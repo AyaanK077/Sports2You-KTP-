@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import recWestMainCourtImage from "./recwest.jpg";
 import aciMainGymPreviewImage from "./activitycentre.jpg";
-import aciAuxiliaryPreviewImage from "./auxiliary.jpg";
-import acoOutdoorBasketPreviewImage from "./outdoorbasket.jpg";
-import acoSandVolleyballPreviewImage from "./volleycourts.jpg";
+import aciAuxiliaryPreviewImage from "./auxiliary.png";
+import acoOutdoorCourt3PreviewImage from "./court3.png";
+import acoSandVolleyballPreviewImage from "./volleycourts.png";
 import acoTennisCourtsPreviewImage from "./tenniscourts.jpg";
 import facilityIndoorHoverImage from "./activitycentre.jpg";
 import facilityOutdoorHoverImage from "./outdoorcentre.jpg";
@@ -52,7 +52,7 @@ const FACILITIES = {
       { id: "aci-main-left", name: "Main Gym – Left Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
       { id: "aci-main-mid", name: "Main Gym – Middle Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
       { id: "aci-main-right", name: "Main Gym – Right Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
-      { id: "aci-aux", name: "Auxiliary Gym", gym: "Auxiliary Gym", sports: ["basketball", "indoor-soccer"], type: "multi-use", image: aciAuxiliaryPreviewImage, previewSubtitle: "Basketball & indoor soccer" },
+      { id: "aci-aux", name: "Auxiliary Gym", gym: "Auxiliary Gym", sports: ["basketball", "indoor-soccer"], type: "multi-use", image: aciAuxiliaryPreviewImage, previewSubtitle: "Basketball & indoor soccer", previewObjectPosition: "center 55%" },
     ],
     hours: {
       Sunday: "12:00 PM – 1:00 AM", Monday: "7:00 AM – 1:00 AM", Tuesday: "7:00 AM – 1:00 AM",
@@ -94,11 +94,11 @@ const FACILITIES = {
     image: "activity.png",
     description: "UTD's outdoor facility featuring 3 basketball courts, 2 sand volleyball courts, and 10 tennis courts.",
     courts: [
-      { id: "aco-bball-1", name: "Outdoor Court 1", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: acoOutdoorBasketPreviewImage, previewSubtitle: "Outdoor basketball court" },
-      { id: "aco-bball-2", name: "Outdoor Court 2", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: acoOutdoorBasketPreviewImage, previewSubtitle: "Outdoor basketball court" },
-      { id: "aco-bball-3", name: "Outdoor Court 3", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: acoOutdoorBasketPreviewImage, previewSubtitle: "Outdoor basketball court" },
-      { id: "aco-svb-1", name: "Sand Volleyball Court 1", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 80%" },
-      { id: "aco-svb-2", name: "Sand Volleyball Court 2", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 80%" },
+      { id: "aco-bball-1", name: "Outdoor Court 1", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: "/court1.png", previewSubtitle: "Outdoor basketball court" },
+      { id: "aco-bball-2", name: "Outdoor Court 2", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: "/court2.png", previewSubtitle: "Outdoor basketball court" },
+      { id: "aco-bball-3", name: "Outdoor Court 3", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: acoOutdoorCourt3PreviewImage, previewSubtitle: "Outdoor basketball court", previewObjectPosition: "center 58%" },
+      { id: "aco-svb-1", name: "Sand Volleyball Court 1", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 60%" },
+      { id: "aco-svb-2", name: "Sand Volleyball Court 2", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 60%" },
       { id: "aco-ten-1", name: "Tennis Court 1", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
       { id: "aco-ten-2", name: "Tennis Court 2", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
       { id: "aco-ten-3", name: "Tennis Court 3", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
@@ -1367,35 +1367,6 @@ function FacilitiesPage({ setPage, setReserveDefaults }) {
           animation: temoc-float 14s ease-in-out infinite, temoc-glow-pulse 6s ease-in-out infinite;
           pointer-events: none;
         }
-        .facility-card-image-layer {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          opacity: 0;
-          transform: scale(1);
-          transition: opacity 360ms ease-out, transform 420ms ease-out;
-          pointer-events: none;
-        }
-        .facility-card-image-layer img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          display: block;
-        }
-        .facility-card-image-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(160deg, rgba(8,10,14,0.7) 0%, rgba(8,10,14,0.5) 45%, rgba(8,10,14,0.75) 100%);
-        }
-        .facility-card-content-layer {
-          position: relative;
-          z-index: 1;
-        }
-        .facility-card-hover:hover .facility-card-image-layer {
-          opacity: 1;
-          transform: scale(1.02);
-        }
       `}</style>
 
       <div className="facilities-hero">
@@ -1417,23 +1388,8 @@ function FacilitiesPage({ setPage, setReserveDefaults }) {
 }
 
 function FacilityCard({ facility: f, onView, onReserve }) {
-  const hoverImage = f.id === "aci"
-    ? facilityIndoorHoverImage
-    : f.id === "aco"
-      ? facilityOutdoorHoverImage
-      : f.id === "recwest"
-        ? facilityRecWestHoverImage
-        : null;
-
   return (
-    <div className="card facility-card-hover" style={{ display: "flex", flexDirection: "column", gap: 0, background: "linear-gradient(135deg, rgba(244,124,32,0.04), rgba(57,217,138,0.04))" }}>
-      {hoverImage ? (
-        <div className="facility-card-image-layer" aria-hidden>
-          <img src={hoverImage} alt="" loading="lazy" />
-          <div className="facility-card-image-overlay" />
-        </div>
-      ) : null}
-      <div className="facility-card-content-layer">
+    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 0, background: "linear-gradient(135deg, rgba(244,124,32,0.04), rgba(57,217,138,0.04))" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 24 }}>
         <div><img src={`/${f.image}`} alt={f.name} style={{ width: 56, height: 56 }} /></div>
         <div style={{ flex: 1 }}>
@@ -1479,7 +1435,6 @@ function FacilityCard({ facility: f, onView, onReserve }) {
       <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
         <button className="btn btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: 15 }} onClick={onView}><img src="/list.png" alt="details" style={{ width: 15, height: 15, verticalAlign: "middle" }} /> Details</button>
         <button className="btn btn-primary" style={{ flex: 1, justifyContent: "center", fontSize: 15 }} onClick={onReserve}><img src="/clock.png" alt="reserve" style={{ width: 15, height: 15, verticalAlign: "middle" }} /> Reserve</button>
-      </div>
       </div>
     </div>
   );
@@ -1691,17 +1646,29 @@ function ReservePage({ bookings, onBook, defaults, showToast }) {
           position: relative;
           width: 100%;
           height: clamp(180px, 36vw, 220px);
+          overflow: hidden;
           background: linear-gradient(135deg, rgba(244,124,32,0.18), rgba(57,217,138,0.12), rgba(10,11,13,0.5));
         }
         .court-preview-media img {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center center;
           display: block;
+        }
+        .court-preview-media--sand {
+          height: clamp(200px, 40vw, 248px);
+        }
+        .court-preview-media--sand .court-preview-media-overlay {
+          background: linear-gradient(to bottom, transparent 0%, rgba(10,11,13,0.06) 42%, rgba(10,11,13,0.52) 100%);
         }
         .court-preview-media-overlay {
           position: absolute;
           inset: 0;
+          z-index: 1;
           pointer-events: none;
           background: linear-gradient(to top, rgba(10,11,13,0.55) 0%, rgba(10,11,13,0.15) 35%, transparent 70%);
         }
@@ -1838,17 +1805,23 @@ function CourtSportStepPreview({ court }) {
 
   const title = `${court.facility.name} – ${court.name}`;
   const subtitle = court.previewSubtitle ?? null;
+  const isSandVolleyball =
+    court.id?.startsWith("aco-svb") || court.sports?.includes("sand-volleyball");
+  const imgStyle = court.previewObjectPosition
+    ? { objectPosition: court.previewObjectPosition }
+    : undefined;
 
   return (
     <div className="court-preview-card">
-      <div className="court-preview-media">
+      <div className={`court-preview-media${isSandVolleyball ? " court-preview-media--sand" : ""}`}>
         {!imgFailed ? (
           <img
             src={court.image}
             alt=""
             onError={() => setImgFailed(true)}
-            loading="lazy"
-            style={court.previewObjectPosition ? { objectPosition: court.previewObjectPosition } : undefined}
+            loading="eager"
+            decoding="async"
+            style={imgStyle}
           />
         ) : null}
         {imgFailed ? <div className="court-preview-fallback" aria-hidden /> : null}
