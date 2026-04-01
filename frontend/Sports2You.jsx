@@ -1,5 +1,13 @@
-
 import { useState, useEffect, useCallback } from "react";
+import recWestMainCourtImage from "./recwest.jpg";
+import aciMainGymPreviewImage from "./activitycentre.jpg";
+import aciAuxiliaryPreviewImage from "./auxiliary.png";
+import acoOutdoorCourt3PreviewImage from "./court3.png";
+import acoSandVolleyballPreviewImage from "./volleycourts.png";
+import acoTennisCourtsPreviewImage from "./tenniscourts.jpg";
+import facilityIndoorHoverImage from "./activitycentre.jpg";
+import facilityOutdoorHoverImage from "./outdoorcentre.jpg";
+import facilityRecWestHoverImage from "./recwest.jpg";
 
 // ─── AUTH UTILITIES ───────────────────────────────────────────────────────────
 const initAuthFromStorage = () => {
@@ -33,18 +41,18 @@ const getInitials = (fullName) => {
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const FACILITIES = {
-  ac: {
-    id: "ac",
-    name: "Activity Center",
-    short: "AC",
+  aci: {
+    id: "aci",
+    name: "Activity Center Indoor",
+    short: "ACI",
     address: "800 W Campbell Rd, Richardson, TX 75080",
     image: "activity.png",
-    description: "UTD's main athletic facility featuring 3 full-size basketball courts and a flexible side gym for basketball and soccer.",
+    description: "UTD's main indoor athletic facility featuring 3 full-size basketball courts and the Auxiliary Gym for basketball and indoor soccer.",
     courts: [
-      { id: "ac-main-left", name: "Main Gym – Left Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only" },
-      { id: "ac-main-mid", name: "Main Gym – Middle Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only" },
-      { id: "ac-main-right", name: "Main Gym – Right Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only" },
-      { id: "ac-side", name: "Side Gym", gym: "Side Gym", sports: ["basketball", "soccer"], type: "multi-use" },
+      { id: "aci-main-left", name: "Main Gym – Left Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
+      { id: "aci-main-mid", name: "Main Gym – Middle Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
+      { id: "aci-main-right", name: "Main Gym – Right Court", gym: "Main Gym", sports: ["basketball"], type: "basketball-only", image: aciMainGymPreviewImage, previewSubtitle: "Full-size indoor basketball court" },
+      { id: "aci-aux", name: "Auxiliary Gym", gym: "Auxiliary Gym", sports: ["basketball", "indoor-soccer"], type: "multi-use", image: aciAuxiliaryPreviewImage, previewSubtitle: "Basketball & indoor soccer", previewObjectPosition: "center 55%" },
     ],
     hours: {
       Sunday: "12:00 PM – 1:00 AM", Monday: "7:00 AM – 1:00 AM", Tuesday: "7:00 AM – 1:00 AM",
@@ -59,9 +67,48 @@ const FACILITIES = {
     short: "Rec West",
     address: "2050 Waterview Pkwy, Richardson, TX 75080",
     image: "hoop.png",
-    description: "A modern recreation facility on the west side of campus with a large multi-sport court available for basketball and soccer.",
+    description: "A modern recreation facility on the west side of campus with courts for basketball and indoor volleyball.",
     courts: [
-      { id: "rw-main", name: "Main Court", gym: "Main Hall", sports: ["basketball", "soccer"], type: "multi-use" },
+      {
+        id: "rw-main",
+        name: "Main Court",
+        gym: "Main Hall",
+        sports: ["basketball", "indoor-volleyball"],
+        type: "multi-use",
+        image: recWestMainCourtImage,
+        previewSubtitle: "Indoor multi-sport court",
+      },
+    ],
+    hours: {
+      Sunday: "12:00 PM – 1:00 AM", Monday: "7:00 AM – 1:00 AM", Tuesday: "7:00 AM – 1:00 AM",
+      Wednesday: "7:00 AM – 1:00 AM", Thursday: "7:00 AM – 1:00 AM", Friday: "7:00 AM – 10:00 PM", Saturday: "8:00 AM – 10:00 PM",
+    },
+    openHour: { Sun: 12, Mon: 7, Tue: 7, Wed: 7, Thu: 7, Fri: 7, Sat: 8 },
+    closeHour: { Sun: 25, Mon: 25, Tue: 25, Wed: 25, Thu: 25, Fri: 22, Sat: 22 },
+  },
+  aco: {
+    id: "aco",
+    name: "Activity Center Outdoor",
+    short: "ACO",
+    address: "800 W Campbell Rd, Richardson, TX 75080",
+    image: "activity.png",
+    description: "UTD's outdoor facility featuring 3 basketball courts, 2 sand volleyball courts, and 10 tennis courts.",
+    courts: [
+      { id: "aco-bball-1", name: "Outdoor Court 1", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: "/court1.png", previewSubtitle: "Outdoor basketball court" },
+      { id: "aco-bball-2", name: "Outdoor Court 2", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: "/court2.png", previewSubtitle: "Outdoor basketball court" },
+      { id: "aco-bball-3", name: "Outdoor Court 3", gym: "Basketball", sports: ["basketball"], type: "basketball-only", image: acoOutdoorCourt3PreviewImage, previewSubtitle: "Outdoor basketball court", previewObjectPosition: "center 58%" },
+      { id: "aco-svb-1", name: "Sand Volleyball Court 1", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 60%" },
+      { id: "aco-svb-2", name: "Sand Volleyball Court 2", gym: "Sand Volleyball", sports: ["sand-volleyball"], type: "sand-volleyball-only", image: acoSandVolleyballPreviewImage, previewSubtitle: "Outdoor sand volleyball court", previewObjectPosition: "center 60%" },
+      { id: "aco-ten-1", name: "Tennis Court 1", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-2", name: "Tennis Court 2", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-3", name: "Tennis Court 3", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-4", name: "Tennis Court 4", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-5", name: "Tennis Court 5", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-6", name: "Tennis Court 6", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-7", name: "Tennis Court 7", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-8", name: "Tennis Court 8", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-9", name: "Tennis Court 9", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
+      { id: "aco-ten-10", name: "Tennis Court 10", gym: "Tennis", sports: ["tennis"], type: "tennis-only", image: acoTennisCourtsPreviewImage, previewSubtitle: "Outdoor tennis court", previewObjectPosition: "center 56%" },
     ],
     hours: {
       Sunday: "12:00 PM – 1:00 AM", Monday: "7:00 AM – 1:00 AM", Tuesday: "7:00 AM – 1:00 AM",
@@ -76,12 +123,14 @@ const DAY_MAP = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // seed some pre-booked slots
 const INITIAL_BOOKINGS = [
-  { id: "b1", courtId: "ac-main-left", date: "2025-07-14", startHour: 10, endHour: 11, sport: "basketball", courtType: "half", players: 6, owner: "u1", teammates: ["Sam P.", "Chris L.", "Jordan M.", "Riley K.", "Morgan T."], status: "upcoming" },
-  { id: "b2", courtId: "rw-main", date: "2025-07-16", startHour: 18, endHour: 19, sport: "soccer", courtType: null, players: 8, owner: "u1", teammates: ["Alex C.", "Sam D.", "Chris W.", "Jordan B.", "Riley G.", "Morgan S.", "Taylor F."], status: "upcoming" },
-  { id: "b3", courtId: "ac-side", date: "2025-07-10", startHour: 14, endHour: 15, sport: "basketball", courtType: "full", players: 10, owner: "u1", teammates: ["Sam P.", "Chris L.", "Jordan M.", "Riley K.", "Morgan T.", "Alex C.", "Sam D.", "Chris W.", "Jordan B."], status: "completed" },
-  { id: "bx1", courtId: "ac-main-mid", date: "2025-07-14", startHour: 9, endHour: 11, sport: "basketball", courtType: "full", players: 8, owner: "other", status: "upcoming" },
-  { id: "bx2", courtId: "ac-main-right", date: "2025-07-14", startHour: 11, endHour: 13, sport: "basketball", courtType: "half", players: 6, owner: "other", status: "upcoming" },
+  { id: "b1", courtId: "aci-main-left", date: "2025-07-14", startHour: 10, endHour: 11, sport: "basketball", courtType: "half", players: 6, owner: "u1", teammates: ["Sam P.", "Chris L.", "Jordan M.", "Riley K.", "Morgan T."], status: "upcoming" },
+  { id: "b2", courtId: "rw-main", date: "2025-07-16", startHour: 18, endHour: 19, sport: "indoor-volleyball", courtType: null, players: 8, owner: "u1", teammates: ["Alex C.", "Sam D.", "Chris W.", "Jordan B.", "Riley G.", "Morgan S.", "Taylor F."], status: "upcoming" },
+  { id: "b3", courtId: "aci-aux", date: "2025-07-10", startHour: 14, endHour: 15, sport: "basketball", courtType: "full", players: 10, owner: "u1", teammates: ["Sam P.", "Chris L.", "Jordan M.", "Riley K.", "Morgan T.", "Alex C.", "Sam D.", "Chris W.", "Jordan B."], status: "completed" },
+  { id: "b4", courtId: "aci-aux", date: "2025-07-18", startHour: 19, endHour: 21, sport: "indoor-soccer", courtType: null, players: 8, owner: "u1", teammates: ["Alex C.", "Sam D.", "Chris W.", "Jordan B.", "Riley G.", "Morgan S.", "Taylor F."], status: "upcoming" },
+  { id: "bx1", courtId: "aci-main-mid", date: "2025-07-14", startHour: 9, endHour: 11, sport: "basketball", courtType: "full", players: 8, owner: "other", status: "upcoming" },
+  { id: "bx2", courtId: "aci-main-right", date: "2025-07-14", startHour: 11, endHour: 13, sport: "basketball", courtType: "half", players: 6, owner: "other", status: "upcoming" },
   { id: "bx3", courtId: "rw-main", date: "2025-07-15", startHour: 16, endHour: 18, sport: "basketball", courtType: "full", players: 10, owner: "other", status: "upcoming" },
+  { id: "bx4", courtId: "aco-bball-1", date: "2025-07-12", startHour: 15, endHour: 16, sport: "basketball", courtType: "full", players: 8, owner: "other", status: "upcoming" },
 ];
 
 // ─── UTILITIES ────────────────────────────────────────────────────────────────
@@ -371,6 +420,36 @@ const CSS = `
   @media (max-width: 480px) {
     .container, .container-sm { padding: 0 20px; }
   }
+
+  /* Masked Icons */
+  .mask-tennis {
+    -webkit-mask-image: url('/tennis.png');
+    mask-image: url('/tennis.png');
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    mask-position: center;
+    background-color: var(--orange);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .mask-volleyball {
+    -webkit-mask-image: url('/volleyball.png');
+    mask-image: url('/volleyball.png');
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    mask-position: center;
+    background-color: var(--orange);
+    display: inline-block;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
 `;
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
@@ -550,10 +629,39 @@ function LandingPage({ setPage }) {
         .feature-card:hover::before { opacity: 1; }
         .feature-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; }
         .venue-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
-        .venue-card { background: var(--card); border: 1px solid rgba(57,217,138,0.12); border-radius: var(--radius-lg); padding: 36px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .venue-card { background: var(--card); border: 1px solid rgba(57,217,138,0.12); border-radius: var(--radius-lg); padding: 36px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
         .venue-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, rgba(57,217,138,0), rgba(57,217,138,0.3), rgba(57,217,138,0)); opacity: 0; transition: opacity 0.3s; }
         .venue-card:hover { border-color: rgba(57,217,138,0.3); box-shadow: 0 0 40px rgba(57,217,138,0.12), inset 0 0 40px rgba(57,217,138,0.04); }
         .venue-card:hover::before { opacity: 1; }
+        .venue-card-image-layer {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          opacity: 0;
+          transform: scale(1);
+          transition: opacity 380ms ease-out, transform 520ms ease-out;
+          pointer-events: none;
+        }
+        .venue-card-image-layer img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+        .venue-card-image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(150deg, rgba(6,9,14,0.62) 0%, rgba(6,9,14,0.42) 45%, rgba(6,9,14,0.68) 100%);
+        }
+        .venue-card-content {
+          position: relative;
+          z-index: 2;
+        }
+        .venue-card:hover .venue-card-image-layer {
+          opacity: 1 !important;
+          transform: scale(1.03);
+        }
         @media (max-width: 768px) { 
           .features-grid { grid-template-columns: 1fr; } 
           .venue-grid { grid-template-columns: 1fr; } 
@@ -574,14 +682,14 @@ function LandingPage({ setPage }) {
               <span className="text-orange">Skip the</span><br />
               Conflicts.
             </h1>
-            <p className="hero-sub">Sports2You is the smart reservation system for UTD student athletes. Reserve basketball and soccer courts at the AC and Rec West — no more showing up to a taken court.</p>
+            <p className="hero-sub">Sports2You is the smart reservation system for UTD student athletes. Reserve basketball, volleyball, and tennis courts across three facilities — no more showing up to a taken court.</p>
             <div className="hero-ctas">
               <button className="btn btn-primary btn-lg" onClick={() => setPage("signup")}>Get Started Free</button>
               <button className="btn btn-ghost btn-lg" onClick={() => setPage("login")}>Sign In</button>
             </div>
             <div className="hero-stats">
-              <div><div className="hero-stat-num text-orange">5</div><div className="hero-stat-label">Reservable Courts</div></div>
-              <div><div className="hero-stat-num text-green">2</div><div className="hero-stat-label">Facilities</div></div>
+              <div><div className="hero-stat-num text-orange">18</div><div className="hero-stat-label">Reservable Courts</div></div>
+              <div><div className="hero-stat-num text-green">3</div><div className="hero-stat-label">Facilities</div></div>
               <div><div className="hero-stat-num text-orange">18h</div><div className="hero-stat-label">Daily Availability</div></div>
             </div>
           </div>
@@ -595,7 +703,7 @@ function LandingPage({ setPage }) {
           <div className="features-grid">
             {[
               { icon: <img src="/calendar.png" alt="calendar" style={{ width: 48, height: 48 }} />, color: "transparent", title: "Pick your slot", desc: "Choose a facility, court, and time slot from real-time availability. No phone calls, no waiting." },
-              { icon: <img src="/basketball.png" alt="basketball" style={{ width: 48, height: 48 }} />, color: "transparent", title: "Set your sport", desc: "Reserve for basketball (half or full court) or soccer. Player minimums are enforced automatically." },
+              { icon: <img src="/basketball.png" alt="basketball" style={{ width: 48, height: 48 }} />, color: "transparent", title: "Set your sport", desc: "Reserve for basketball, soccer, volleyball, tennis, indoor soccer, and more. Player minimums are enforced automatically." },
               { icon: <img src="/tick.png" alt="confirm" style={{ width: 48, height: 48 }} />, color: "transparent", title: "Confirm & play", desc: "Add your teammates, confirm your booking, and walk in with confidence. Court is yours." },
             ].map(f => (
               <div key={f.title} className="feature-card">
@@ -611,17 +719,29 @@ function LandingPage({ setPage }) {
       <div style={{ padding: "60px 0 100px" }}>
         <div className="container">
           <div className="section-label" style={{ marginBottom: 16 }}>Our Facilities</div>
-          <h2 className="heading-lg" style={{ marginBottom: 32 }}>Two locations, five courts</h2>
+          <h2 className="heading-lg" style={{ marginBottom: 32 }}>Three locations, eighteen courts</h2>
           <div className="venue-grid">
             {Object.values(FACILITIES).map(f => (
               <div key={f.id} className="venue-card" onClick={() => setPage("signup")}>
-                <div style={{ marginBottom: 16 }}><img src={`/${f.image}`} alt={f.name} style={{ width: 40, height: 40 }} /></div>
-                <div className="heading-md" style={{ marginBottom: 8 }}>{f.name}</div>
-                <p className="text-muted" style={{ fontSize: 14, marginBottom: 16 }}>{f.description}</p>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {f.courts.map(c => (
-                    <span key={c.id} className="badge badge-gray">{c.name}</span>
-                  ))}
+                {f.id === "aci" || f.id === "aco" || f.id === "recwest" ? (
+                  <div className="venue-card-image-layer" aria-hidden>
+                    <img
+                      src={f.id === "aci" ? facilityIndoorHoverImage : f.id === "aco" ? facilityOutdoorHoverImage : facilityRecWestHoverImage}
+                      alt=""
+                      loading="lazy"
+                    />
+                    <div className="venue-card-image-overlay" />
+                  </div>
+                ) : null}
+                <div className="venue-card-content">
+                  <div style={{ marginBottom: 16 }}><img src={`/${f.image}`} alt={f.name} style={{ width: 40, height: 40 }} /></div>
+                  <div className="heading-md" style={{ marginBottom: 8 }}>{f.name}</div>
+                  <p className="text-muted" style={{ fontSize: 14, marginBottom: 16 }}>{f.description}</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {f.courts.map(c => (
+                      <span key={c.id} className="badge badge-gray">{c.name}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -910,8 +1030,17 @@ function HomePage({ setPage, setReserveDefaults, bookings, user, isFirstLogin })
   const quickStats = [
     { label: "Upcoming", value: bookings.filter(b => b.owner === "u1" && b.status === "upcoming").length, color: "var(--orange)", icon: <img src="/calendar.png" alt="calendar" style={{ width: 40, height: 40 }} /> },
     { label: "Total Booked", value: bookings.filter(b => b.owner === "u1").length, color: "var(--green)", icon: <img src="/basketball.png" alt="basketball" style={{ width: 40, height: 40 }} /> },
-    { label: "Available Courts", value: 5, color: "var(--orange)", icon: <img src="/activity.png" alt="courts" style={{ width: 40, height: 40 }} /> },
+    { label: "Available Courts", value: Object.values(FACILITIES).flatMap(f => f.courts).length, color: "var(--orange)", icon: <img src="/activity.png" alt="courts" style={{ width: 40, height: 40 }} /> },
   ];
+
+  const getFacilityHoverImage = (f) =>
+    f.id === "aci"
+      ? facilityIndoorHoverImage
+      : f.id === "aco"
+        ? facilityOutdoorHoverImage
+        : f.id === "recwest"
+          ? facilityRecWestHoverImage
+          : null;
 
   return (
     <div className="page" style={{ position: "relative" }}>
@@ -945,6 +1074,39 @@ function HomePage({ setPage, setReserveDefaults, bookings, user, isFirstLogin })
         }
         .home-hero-content { position: relative; z-index: 1; }
         .stat-card { !important }
+        .home-facility-card {
+          position: relative;
+          overflow: hidden;
+        }
+        .home-facility-card-image-layer {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          opacity: 0;
+          transform: scale(1);
+          transition: opacity 320ms ease-out, transform 420ms ease-out;
+          pointer-events: none;
+        }
+        .home-facility-card-image-layer img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+        .home-facility-card-image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(150deg, rgba(6,9,14,0.85) 0%, rgba(6,9,14,0.6) 40%, rgba(6,9,14,0.9) 100%);
+        }
+        .home-facility-card-content {
+          position: relative;
+          z-index: 1;
+        }
+        .home-facility-card:hover .home-facility-card-image-layer {
+          opacity: 1;
+          transform: scale(1.02);
+        }
       `}</style>
 
       <div className="home-hero">
@@ -1012,21 +1174,29 @@ function HomePage({ setPage, setReserveDefaults, bookings, user, isFirstLogin })
               {Object.values(FACILITIES).map(f => (
                 <div 
                   key={f.id} 
-                  className="card" 
+                  className="card home-facility-card" 
                   style={{ cursor: "pointer", transition: "all 0.25s" }}
                   onClick={() => { setPage("facility"); setReserveDefaults(d => ({ ...d, facilityId: f.id })); }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
-                      <div><img src={`/${f.image}`} alt={f.name} style={{ width: 44, height: 44 }} /></div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 4 }}>{f.name}</div>
-                        <div className="text-muted" style={{ fontSize: 14 }}>
-                          {f.courts.length} courts • Basketball & Soccer
+                  {getFacilityHoverImage(f) ? (
+                    <div className="home-facility-card-image-layer" aria-hidden>
+                      <img src={getFacilityHoverImage(f)} alt="" loading="lazy" />
+                      <div className="home-facility-card-image-overlay" />
+                    </div>
+                  ) : null}
+                  <div className="home-facility-card-content">
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+                        <div><img src={`/${f.image}`} alt={f.name} style={{ width: 44, height: 44 }} /></div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 4 }}>{f.name}</div>
+                          <div className="text-muted" style={{ fontSize: 14 }}>
+                            {f.courts.length} courts • Basketball & Soccer
+                          </div>
                         </div>
                       </div>
+                      <span className="badge badge-green" style={{ whiteSpace: "nowrap" }}>Open</span>
                     </div>
-                    <span className="badge badge-green" style={{ whiteSpace: "nowrap" }}>Open</span>
                   </div>
                 </div>
               ))}
@@ -1049,7 +1219,14 @@ function BookingCard({ booking, compact, onCancel }) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 28 }}>{booking.sport === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 28, height: 28 }} /> : <img src="/soccer.png" alt="soccer" style={{ width: 28, height: 28 }} />}</div>
+            <div style={{ fontSize: 28, color: "var(--orange)" }}>
+              {booking.sport === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 28, height: 28 }} /> : 
+               booking.sport === "soccer" ? <img src="/soccer.png" alt="soccer" style={{ width: 28, height: 28 }} /> :
+               booking.sport === "indoor-soccer" ? <img src="/soccer.png" alt="indoor-soccer" style={{ width: 28, height: 28 }} /> :
+               booking.sport === "indoor-volleyball" ? <div className="mask-volleyball" style={{ width: 28, height: 28 }} /> : 
+               booking.sport === "sand-volleyball" ? <div className="mask-volleyball" style={{ width: 28, height: 28 }} /> :
+               booking.sport === "tennis" ? <div className="mask-tennis" style={{ width: 28, height: 28 }} /> : <span>⚽</span>}
+            </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 2 }}>{court.name}</div>
               <div className="text-muted" style={{ fontSize: 13 }}>
@@ -1233,7 +1410,17 @@ function FacilityCard({ facility: f, onView, onReserve }) {
             <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", background: "rgba(244,124,32,0.03)", borderRadius: "8px", borderLeft: "3px solid var(--green)" }}>
               <span style={{ fontSize: 15, fontWeight: 600 }}>{c.name}</span>
               <div style={{ display: "flex", gap: 6 }}>
-                {c.sports.map(s => <span key={s} className="badge badge-orange">{s === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 14, height: 14, verticalAlign: "middle" }} /> : <img src="/soccer.png" alt="soccer" style={{ width: 14, height: 14, verticalAlign: "middle" }} />}</span>)}
+                {c.sports.map(s => (
+                  <span key={s} className="badge badge-orange" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--orange)" }}>
+                    {s === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 14, height: 14, verticalAlign: "middle" }} /> : 
+                     s === "soccer" ? <img src="/soccer.png" alt="soccer" style={{ width: 14, height: 14, verticalAlign: "middle" }} /> :
+                     s === "indoor-soccer" ? <img src="/soccer.png" alt="indoor-soccer" style={{ width: 14, height: 14, verticalAlign: "middle" }} /> :
+                     s === "indoor-volleyball" ? <div className="mask-volleyball" style={{ width: 14, height: 14, display: "inline-block", verticalAlign: "middle" }} /> : 
+                     s === "sand-volleyball" ? <div className="mask-volleyball" style={{ width: 14, height: 14, display: "inline-block", verticalAlign: "middle" }} /> :
+                     s === "tennis" ? <div className="mask-tennis" style={{ width: 14, height: 14, display: "inline-block", verticalAlign: "middle" }} /> : "⚽"}
+                    {s.length > 12 ? s.substring(0, 10) + ".." : s}
+                  </span>
+                ))}
               </div>
             </div>
           ))}
@@ -1255,7 +1442,7 @@ function FacilityCard({ facility: f, onView, onReserve }) {
 
 // ─── FACILITY DETAIL PAGE ─────────────────────────────────────────────────────
 function FacilityDetailPage({ facilityId, setPage, setReserveDefaults }) {
-  const f = FACILITIES[facilityId] || FACILITIES.ac;
+  const f = FACILITIES[facilityId] || FACILITIES.aci;
   return (
     <div className="page" style={{ padding: "60px 0" }}>
       <div className="container-sm">
@@ -1297,6 +1484,24 @@ function FacilityDetailPage({ facilityId, setPage, setReserveDefaults }) {
                   <div>
                     <span className="badge badge-orange"><img src="/soccer.png" alt="soccer" style={{ width: 14, height: 14, verticalAlign: "middle" }} /> Soccer</span>
                     <p style={{ fontSize: 14, color: "var(--text2)", marginTop: 8 }}>Minimum 8 players (4v4)</p>
+                  </div>
+                )}
+                {c.sports.includes("indoor-volleyball") && (
+                  <div>
+                    <span className="badge badge-orange" style={{ color: "var(--orange)", display: "inline-flex", alignItems: "center", gap: 6 }}><div className="mask-volleyball" style={{ width: 14, height: 14 }} /> Indoor Volleyball</span>
+                    <p style={{ fontSize: 14, color: "var(--text2)", marginTop: 8 }}>Minimum 6 players (3v3)</p>
+                  </div>
+                )}
+                {c.sports.includes("sand-volleyball") && (
+                  <div>
+                    <span className="badge badge-orange" style={{ color: "var(--orange)", display: "inline-flex", alignItems: "center", gap: 6 }}><div className="mask-volleyball" style={{ width: 14, height: 14 }} /> Sand Volleyball</span>
+                    <p style={{ fontSize: 14, color: "var(--text2)", marginTop: 8 }}>Minimum 4 players (2v2)</p>
+                  </div>
+                )}
+                {c.sports.includes("tennis") && (
+                  <div>
+                    <span className="badge badge-orange" style={{ color: "var(--orange)", display: "inline-flex", alignItems: "center", gap: 6 }}><div className="mask-tennis" style={{ width: 14, height: 14 }} /> Tennis</span>
+                    <p style={{ fontSize: 14, color: "var(--text2)", marginTop: 8 }}>2-4 players allowed</p>
                   </div>
                 )}
               </div>
@@ -1345,6 +1550,16 @@ function ReservePage({ bookings, onBook, defaults, showToast }) {
       return "Full court basketball supports up to 10 players.";
     if (data.sport === "soccer" && totalPlayers < 8)
       return "Soccer reservations require at least 8 players for 4v4 play.";
+    if (data.sport === "indoor-soccer" && totalPlayers < 8)
+      return "Indoor soccer requires at least 8 total players to reserve this court.";
+    if (data.sport === "indoor-volleyball" && totalPlayers < 6)
+      return "Indoor volleyball requires at least 6 players (3v3).";
+    if (data.sport === "sand-volleyball" && totalPlayers < 4)
+      return "Sand volleyball requires at least 4 players (2v2).";
+    if (data.sport === "tennis" && totalPlayers < 2)
+      return "Tennis reservations require at least 2 players.";
+    if (data.sport === "tennis" && totalPlayers > 4)
+      return "Tennis reservations support up to 4 players.";
     return null;
   };
 
@@ -1414,6 +1629,53 @@ function ReservePage({ bookings, onBook, defaults, showToast }) {
         }
         .reserve-hero-content { position: relative; z-index: 1; }
         .reserve-stepper { background: linear-gradient(135deg, rgba(244,124,32,0.03), rgba(57,217,138,0.03)); border: 1px solid var(--border2); border-radius: 12px; padding: 24px; margin-bottom: 28px; }
+        @keyframes court-preview-enter {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .court-preview-card {
+          margin-bottom: 24px;
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          border: 1px solid rgba(244,124,32,0.28);
+          box-shadow: 0 0 28px rgba(244,124,32,0.14), 0 0 22px rgba(57,217,138,0.1);
+          background: linear-gradient(145deg, rgba(22,26,36,0.98) 0%, rgba(14,16,22,0.99) 50%, rgba(19,22,32,1) 100%);
+          animation: court-preview-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .court-preview-media {
+          position: relative;
+          width: 100%;
+          height: clamp(180px, 36vw, 220px);
+          overflow: hidden;
+          background: linear-gradient(135deg, rgba(244,124,32,0.18), rgba(57,217,138,0.12), rgba(10,11,13,0.5));
+        }
+        .court-preview-media img {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
+          display: block;
+        }
+        .court-preview-media--sand {
+          height: clamp(200px, 40vw, 248px);
+        }
+        .court-preview-media--sand .court-preview-media-overlay {
+          background: linear-gradient(to bottom, transparent 0%, rgba(10,11,13,0.06) 42%, rgba(10,11,13,0.52) 100%);
+        }
+        .court-preview-media-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          background: linear-gradient(to top, rgba(10,11,13,0.55) 0%, rgba(10,11,13,0.15) 35%, transparent 70%);
+        }
+        .court-preview-fallback { width: 100%; height: 100%; min-height: 180px; }
+        .court-preview-copy { padding: 18px 22px 22px; }
+        .court-preview-title { font-family: var(--font-cond); font-size: 22px; font-weight: 800; color: var(--text); margin: 0 0 6px 0; letter-spacing: -0.3px; }
+        .court-preview-sub { margin: 0; font-size: 14px; font-weight: 600; color: var(--text2); }
       `}</style>
 
       <div className="reserve-hero">
@@ -1516,7 +1778,16 @@ function StepCourt({ data, update, facility }) {
               <div>
                 <div style={{ fontWeight: 800, marginBottom: 6, fontSize: 18 }}>{c.name}</div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  {c.sports.map(s => <span key={s} className="badge badge-orange" style={{ fontSize: 13 }}>{s === "basketball" ? <><img src="/basketball.png" alt="basketball" style={{ width: 13, height: 13, verticalAlign: "middle" }} /> Basketball</> : <><img src="/soccer.png" alt="soccer" style={{ width: 13, height: 13, verticalAlign: "middle" }} /> Soccer</>}</span>)}
+                  {c.sports.map(s => (
+                    <span key={s} className="badge badge-orange" style={{ fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4, color: "var(--orange)" }}>
+                      {s === "basketball" ? <><img src="/basketball.png" alt="basketball" style={{ width: 13, height: 13, verticalAlign: "middle" }} /> Basketball</> : 
+                       s === "soccer" ? <><img src="/soccer.png" alt="soccer" style={{ width: 13, height: 13, verticalAlign: "middle" }} /> Soccer</> :
+                       s === "indoor-soccer" ? <><img src="/soccer.png" alt="indoor-soccer" style={{ width: 13, height: 13, verticalAlign: "middle" }} /> In-Soccer</> :
+                       s === "indoor-volleyball" ? <><div className="mask-volleyball" style={{ width: 13, height: 13, display: "inline-block", verticalAlign: "middle" }} /> Volleyball</> : 
+                       s === "sand-volleyball" ? <><div className="mask-volleyball" style={{ width: 13, height: 13, display: "inline-block", verticalAlign: "middle" }} /> Sand VB</> :
+                       s === "tennis" ? <><div className="mask-tennis" style={{ width: 13, height: 13, display: "inline-block", verticalAlign: "middle" }} /> Tennis</> : s}
+                    </span>
+                  ))}
                 </div>
               </div>
               {data.courtId === c.id && <div><img src="/tick.png" alt="selected" style={{ width: 20, height: 20 }} /></div>}
@@ -1528,20 +1799,76 @@ function StepCourt({ data, update, facility }) {
   );
 }
 
+function CourtSportStepPreview({ court }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  if (!court.image) return null;
+
+  const title = `${court.facility.name} – ${court.name}`;
+  const subtitle = court.previewSubtitle ?? null;
+  const isSandVolleyball =
+    court.id?.startsWith("aco-svb") || court.sports?.includes("sand-volleyball");
+  const imgStyle = court.previewObjectPosition
+    ? { objectPosition: court.previewObjectPosition }
+    : undefined;
+
+  return (
+    <div className="court-preview-card">
+      <div className={`court-preview-media${isSandVolleyball ? " court-preview-media--sand" : ""}`}>
+        {!imgFailed ? (
+          <img
+            src={court.image}
+            alt=""
+            onError={() => setImgFailed(true)}
+            loading="eager"
+            decoding="async"
+            style={imgStyle}
+          />
+        ) : null}
+        {imgFailed ? <div className="court-preview-fallback" aria-hidden /> : null}
+        <div className="court-preview-media-overlay" aria-hidden />
+      </div>
+      <div className="court-preview-copy">
+        <h3 className="court-preview-title">{title}</h3>
+        {subtitle ? <p className="court-preview-sub">{subtitle}</p> : null}
+      </div>
+    </div>
+  );
+}
+
 function StepSport({ data, update, court }) {
   return (
     <div>
+      <CourtSportStepPreview court={court} />
       <div className="section-label" style={{ marginBottom: 20 }}>Choose Sport</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
         {court.sports.map(s => (
-          <div key={s} onClick={() => { update("sport", s); update("courtType", s === "soccer" ? "" : data.courtType); }}
+          <div key={s} onClick={() => { update("sport", s); update("courtType", s === "basketball" ? data.courtType : ""); }}
             style={{ padding: "20px 24px", borderRadius: "var(--radius)", border: `2px solid ${data.sport === s ? "var(--orange)" : "var(--border2)"}`, background: data.sport === s ? "rgba(244,124,32,0.1)" : "var(--bg3)", cursor: "pointer", transition: "all 0.15s" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 40 }}>{s === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 40, height: 40 }} /> : <img src="/soccer.png" alt="soccer" style={{ width: 40, height: 40 }} />}</span>
+              <span style={{ fontSize: 40, color: "var(--orange)" }}>
+                {s === "basketball" ? <img src="/basketball.png" alt="basketball" style={{ width: 40, height: 40 }} /> : 
+                 s === "soccer" ? <img src="/soccer.png" alt="soccer" style={{ width: 40, height: 40 }} /> :
+                 s === "indoor-soccer" ? <img src="/soccer.png" alt="indoor-soccer" style={{ width: 40, height: 40 }} /> :
+                 s === "indoor-volleyball" ? <div className="mask-volleyball" style={{ width: 40, height: 40 }} /> : 
+                 s === "sand-volleyball" ? <div className="mask-volleyball" style={{ width: 40, height: 40 }} /> :
+                 s === "tennis" ? <div className="mask-tennis" style={{ width: 40, height: 40 }} /> : "⚽"}
+              </span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: 18 }}>{s.charAt(0).toUpperCase() + s.slice(1)}</div>
+                <div style={{ fontWeight: 800, fontSize: 18 }}>
+                  {s === "basketball" ? "Basketball" : 
+                   s === "soccer" ? "Soccer" :
+                   s === "indoor-soccer" ? "Indoor Soccer" :
+                   s === "indoor-volleyball" ? "Indoor Volleyball" : 
+                   s === "sand-volleyball" ? "Sand Volleyball" :
+                   s === "tennis" ? "Tennis" : s.charAt(0).toUpperCase() + s.slice(1)}
+                </div>
                 <div className="text-muted" style={{ fontSize: 15 }}>
-                  {s === "basketball" ? "Half court (min 6 players) or Full court (max 10 players)" : "Minimum 8 players for 4v4 play"}
+                  {s === "basketball" ? "Half court (min 6) or Full court (max 10)" : 
+                   s === "soccer" ? "Minimum 8 players for 4v4" :
+                   s === "indoor-soccer" ? "Minimum 8 players (4v4) - Auxiliary Gym only" :
+                   s === "indoor-volleyball" ? "Minimum 6 players (3v3)" : 
+                   s === "sand-volleyball" ? "Minimum 4 players (2v2)" :
+                  s === "tennis" ? "2-4 players allowed" : "Maximum 10 players"}
                 </div>
               </div>
               {data.sport === s && <div><img src="/tick.png" alt="selected" style={{ width: 20, height: 20 }} /></div>}
@@ -1678,6 +2005,10 @@ function StepPlayers({ data, update, totalPlayers, validationError }) {
         {data.sport === "basketball" && data.courtType === "half" && "Half court bookings require at least 6 players total."}
         {data.sport === "basketball" && data.courtType === "full" && "Full court basketball supports up to 10 players."}
         {data.sport === "soccer" && "Soccer reservations require at least 8 players for 4v4 play."}
+        {data.sport === "indoor-soccer" && "Indoor soccer requires at least 8 total players to reserve this court."}
+        {data.sport === "indoor-volleyball" && "Indoor volleyball requires at least 6 players (3v3)."}
+        {data.sport === "sand-volleyball" && "Sand volleyball requires at least 4 players (2v2)."}
+        {data.sport === "tennis" && "Tennis reservations require 2-4 players."}
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
