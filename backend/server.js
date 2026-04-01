@@ -1,18 +1,45 @@
-const express = require("express");
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config({ override: true });
+
+const connectDB = require('./config/db');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3001;
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Backend running");
+// Routes
+const authRoutes = require('./routes/auth');
+const bookingsRoutes = require('./routes/bookings');
+const facilitiesRoutes = require('./routes/facilities');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/bookings', bookingsRoutes);
+app.use('/api/facilities', facilitiesRoutes);
+
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Sports2You backend is running!', status: 'ok' });
 });
 
-app.get("/test", (req, res) => {
-  res.json({ message: "API works" });
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Sports2You backend running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
