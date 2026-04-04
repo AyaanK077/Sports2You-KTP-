@@ -29,7 +29,7 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
   const canNext = () => {
     if (step === 0) return !!facilityId;
     if (step === 1) return !!courtId;
-    if (step === 2) return !!sport && (sport === 'soccer' || !!courtType);
+    if (step === 2) return !!sport && (sport !== 'basketball' || !!courtType);
     if (step === 3) return selectedSlots.length > 0;
     if (step === 4) {
       const p = parseInt(players);
@@ -37,7 +37,10 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
         if (courtType === 'half') return p >= 6;
         if (courtType === 'full') return p >= 2 && p <= 10;
       }
-      if (sport === 'soccer') return p >= 8;
+      if (sport === 'indoor-soccer') return p >= 8;
+      if (sport === 'indoor-volleyball') return p >= 6;
+      if (sport === 'sand-volleyball') return p >= 6;
+      if (sport === 'tennis') return p >= 2;
       return p > 0;
     }
     return true;
@@ -158,22 +161,27 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
         {/* Step 2: Sport */}
         {step === 2 && court && (
           <View style={styles.options}>
-            {court.sports.map((s) => (
+            {court.sports.map((s) => {
+              const sportMeta = {
+                'basketball':       { icon: '🏀', label: 'Basketball',       hint: 'Half court (min 6) or Full court (max 10)' },
+                'indoor-soccer':    { icon: '⚽', label: 'Indoor Soccer',    hint: 'Minimum 8 players' },
+                'indoor-volleyball':{ icon: '🏐', label: 'Indoor Volleyball', hint: 'Minimum 6 players' },
+                'sand-volleyball':  { icon: '🏐', label: 'Sand Volleyball',  hint: 'Minimum 6 players' },
+                'tennis':           { icon: '🎾', label: 'Tennis',           hint: 'Minimum 2 players' },
+              };
+              const meta = sportMeta[s] || { icon: '🏅', label: s, hint: '' };
+              return (
               <TouchableOpacity
                 key={s}
                 style={[styles.optionCard, sport === s && styles.optionCardActive]}
                 onPress={() => { setSport(s); setCourtType(null); }}
               >
-                <Text style={styles.optionIcon}>{s === 'basketball' ? '🏀' : '⚽'}</Text>
-                <Text style={styles.optionTitle}>{s.charAt(0).toUpperCase() + s.slice(1)}</Text>
-                {s === 'basketball' && (
-                  <Text style={styles.optionSub}>Half court (min 6) or Full court (max 10)</Text>
-                )}
-                {s === 'soccer' && (
-                  <Text style={styles.optionSub}>Minimum 8 players</Text>
-                )}
+                <Text style={styles.optionIcon}>{meta.icon}</Text>
+                <Text style={styles.optionTitle}>{meta.label}</Text>
+                <Text style={styles.optionSub}>{meta.hint}</Text>
               </TouchableOpacity>
-            ))}
+              );
+            })}
             {sport === 'basketball' && (
               <View style={{ marginTop: 16 }}>
                 <Text style={styles.subSectionTitle}>Court Type</Text>
@@ -252,15 +260,12 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
         {step === 4 && (
           <View>
             <Text style={styles.label}>Number of Players</Text>
-            {sport === 'basketball' && courtType === 'half' && (
-              <Text style={styles.hint}>Minimum 6 players required</Text>
-            )}
-            {sport === 'basketball' && courtType === 'full' && (
-              <Text style={styles.hint}>Maximum 10 players allowed</Text>
-            )}
-            {sport === 'soccer' && (
-              <Text style={styles.hint}>Minimum 8 players required</Text>
-            )}
+            {sport === 'basketball' && courtType === 'half' && <Text style={styles.hint}>Minimum 6 players required</Text>}
+            {sport === 'basketball' && courtType === 'full' && <Text style={styles.hint}>Maximum 10 players allowed</Text>}
+            {sport === 'indoor-soccer' && <Text style={styles.hint}>Minimum 8 players required</Text>}
+            {sport === 'indoor-volleyball' && <Text style={styles.hint}>Minimum 6 players required</Text>}
+            {sport === 'sand-volleyball' && <Text style={styles.hint}>Minimum 6 players required</Text>}
+            {sport === 'tennis' && <Text style={styles.hint}>Minimum 2 players required</Text>}
             <TextInput
               style={styles.input}
               placeholder="e.g. 8"

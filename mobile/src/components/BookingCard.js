@@ -7,7 +7,11 @@ export default function BookingCard({ booking, onCancel, showCancel }) {
   const court = getCourtById(booking.courtId);
   const facilityName = court?.facility?.short || '';
   const courtName = court?.name || '';
-  const sportLabel = booking.sport.charAt(0).toUpperCase() + booking.sport.slice(1);
+  const sportLabels = {
+    'basketball': 'Basketball', 'indoor-soccer': 'Indoor Soccer',
+    'indoor-volleyball': 'Indoor Volleyball', 'sand-volleyball': 'Sand Volleyball', 'tennis': 'Tennis',
+  };
+  const sportLabel = sportLabels[booking.sport] || booking.sport;
   const isUpcoming = booking.status === 'upcoming';
 
   return (
