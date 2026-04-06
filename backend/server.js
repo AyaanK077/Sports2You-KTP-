@@ -1,11 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config({ override: true });
-
-const connectDB = require('./config/db');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 
 // Middleware
 app.use(cors());
@@ -30,16 +27,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
 });
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Sports2You backend running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('Server startup failed:', error.message);
-    process.exit(1);
-  }
-};
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`Sports2You backend running on http://localhost:${PORT}`);
+});

@@ -1,0 +1,135 @@
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
+import BookingCard from '../components/BookingCard';
+
+export default function ReservationsScreen({ bookings, onCancelBooking, showToast, setPage }) {
+  const [tab, setTab] = useState('upcoming');
+
+  const myBookings = bookings.filter((b) => b.owner === 'u1');
+  const upcoming = myBookings.filter((b) => b.status === 'upcoming');
+  const past = myBookings.filter((b) => b.status === 'completed');
+  const displayed = tab === 'upcoming' ? upcoming : past;
+
+  const handleCancel = (id) => {
+    onCancelBooking(id);
+    showToast('Reservation cancelled', 'success');
+  };
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.pageHeader}>
+        <Text style={styles.pageTitle}>My Reservations</Text>
+        <TouchableOpacity style={styles.reserveBtn} onPress={() => setPage('reserve')}>
+          <Text style={styles.reserveBtnText}>+ New</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Tabs */}
+      <View style={styles.tabs}>
+        {['upcoming', 'past'].map((t) => (
+          <TouchableOpacity
+            key={t}
+            style={[styles.tab, tab === t && styles.tabActive]}
+            onPress={() => setTab(t)}
+          >
+            <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {t === 'upcoming' && upcoming.length > 0 && (
+                <Text style={styles.tabCount}> ({upcoming.length})</Text>
+              )}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {displayed.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>{tab === 'upcoming' ? '📅' : '✓'}</Text>
+            <Text style={styles.emptyTitle}>
+              {tab === 'upcoming' ? 'No upcoming reservations' : 'No past reservations'}
+            </Text>
+            {tab === 'upcoming' && (
+              <TouchableOpacity style={styles.btnPrimary} onPress={() => setPage('reserve')}>
+                <Text style={styles.btnPrimaryText}>Make a Reservation</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          displayed.map((b) => (
+            <BookingCard
+              key={b.id}
+              booking={b}
+              showCancel={tab === 'upcoming'}
+              onCancel={handleCancel}
+            />
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: COLORS.bg },
+  pageHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  pageTitle: { fontSize: FONT_SIZE.xxl, fontWeight: '800', color: COLORS.text },
+  reserveBtn: {
+    backgroundColor: COLORS.orange,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+  },
+  reserveBtnText: { color: '#fff', fontWeight: '700', fontSize: FONT_SIZE.sm },
+
+  tabs: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  tab: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
+  },
+  tabActive: {
+    backgroundColor: 'rgba(57,217,138,0.12)',
+    borderColor: COLORS.border2,
+  },
+  tabText: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.text2 },
+  tabTextActive: { color: COLORS.green },
+  tabCount: { color: COLORS.green },
+
+  scroll: { flex: 1 },
+  content: { padding: 16, paddingBottom: 40 },
+
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    gap: 12,
+  },
+  emptyIcon: { fontSize: 48 },
+  emptyTitle: { fontSize: FONT_SIZE.lg, color: COLORS.text2, fontWeight: '600' },
+  btnPrimary: {
+    backgroundColor: COLORS.orange,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: RADIUS.md,
+    marginTop: 8,
+  },
+  btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: FONT_SIZE.sm },
+});

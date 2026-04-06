@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Sports2You",
+    "slug": "sports2you",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#09090d"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.utd.sports2you"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090d"
+      },
+      "package": "com.utd.sports2you"
+    }
+  }
+}
