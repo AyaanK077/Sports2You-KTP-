@@ -4,7 +4,7 @@ import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import { clearUser } from '../utils/storage';
 
 export default function ProfileScreen({ user, bookings, onLogout, showToast }) {
-  const myBookings = bookings.filter((b) => b.owner === 'u1');
+  const myBookings = bookings.filter((b) => b.owner === user?.id);
   const upcoming = myBookings.filter((b) => b.status === 'upcoming').length;
   const completed = myBookings.filter((b) => b.status === 'completed').length;
 

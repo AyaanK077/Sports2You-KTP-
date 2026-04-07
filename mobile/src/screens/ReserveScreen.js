@@ -5,13 +5,13 @@ import {
 } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import {
-  FACILITIES, getTodayStr, addDays, getDayOfWeek,
-  formatDate, formatHour, getSlotsForCourt, genId, getCourtById,
+  getTodayStr, addDays, getDayOfWeek,
+  formatDate, formatHour, getSlotsForCourt, getCourtById,
 } from '../constants/data';
 
 const STEPS = ['Location', 'Court', 'Sport', 'Date & Time', 'Players', 'Review'];
 
-export default function ReserveScreen({ bookings, onAddBooking, showToast, setPage }) {
+export default function ReserveScreen({ bookings, facilities = {}, onAddBooking, showToast, setPage, user }) {
   const [step, setStep] = useState(0);
   const [facilityId, setFacilityId] = useState(null);
   const [courtId, setCourtId] = useState(null);
@@ -23,8 +23,8 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
   const [teammates, setTeammates] = useState('');
   const [confirmed, setConfirmed] = useState(false);
 
-  const facility = facilityId ? FACILITIES[facilityId] : null;
-  const court = courtId ? getCourtById(courtId) : null;
+  const facility = facilityId ? facilities[facilityId] : null;
+  const court = courtId ? getCourtById(courtId, facilities) : null;
 
   const canNext = () => {
     if (step === 0) return !!facilityId;
@@ -48,8 +48,9 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
 
   const handleConfirm = () => {
     const sortedSlots = [...selectedSlots].sort((a, b) => a - b);
-    const newBooking = {
-      id: genId(),
+    const bookingPayload = {
+      userId: user?.id,
+      facilityId,
       courtId,
       date,
       startHour: sortedSlots[0],
@@ -57,13 +58,18 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
       sport,
       courtType: sport === 'basketball' ? courtType : null,
       players: parseInt(players),
-      owner: 'u1',
+      owner: user?.id,
       teammates: teammates.split(',').map((t) => t.trim()).filter(Boolean),
       status: 'upcoming',
     };
-    onAddBooking(newBooking);
-    setConfirmed(true);
-    showToast('Court reserved successfully!', 'success');
+    onAddBooking(bookingPayload)
+      .then(() => {
+        setConfirmed(true);
+        showToast('Court reserved successfully!', 'success');
+      })
+      .catch((error) => {
+        showToast(error.message || 'Reservation failed', 'error');
+      });
   };
 
   if (confirmed) {
@@ -90,7 +96,7 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
     );
   }
 
-  const slots = courtId ? getSlotsForCourt(courtId, date, bookings) : [];
+  const slots = courtId ? getSlotsForCourt(courtId, date, bookings, facilities) : [];
 
   const toggleSlot = (hour) => {
     setSelectedSlots((prev) => {
@@ -122,7 +128,7 @@ export default function ReserveScreen({ bookings, onAddBooking, showToast, setPa
         {/* Step 0: Location */}
         {step === 0 && (
           <View style={styles.options}>
-            {Object.values(FACILITIES).map((f) => (
+            {Object.values(facilities).map((f) => (
               <TouchableOpacity
                 key={f.id}
                 style={[styles.optionCard, facilityId === f.id && styles.optionCardActive]}

@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    studentId: {
+      type: String,
+      default: null,
+    },
     phone: {
       type: String,
       default: null,

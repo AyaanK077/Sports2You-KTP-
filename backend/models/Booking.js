@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const bookingSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: true,
     },
     facilityId: {
@@ -16,7 +15,7 @@ const bookingSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: Date,
+      type: String,
       required: true,
     },
     time: {
@@ -28,10 +27,34 @@ const bookingSchema = new mongoose.Schema(
       required: true,
       default: 1,
     },
+    startHour: {
+      type: Number,
+      required: true,
+    },
+    endHour: {
+      type: Number,
+      required: true,
+    },
+    sport: {
+      type: String,
+      required: true,
+    },
+    courtType: {
+      type: String,
+      default: null,
+    },
+    players: {
+      type: Number,
+      default: 1,
+    },
+    teammates: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'cancelled'],
-      default: 'confirmed',
+      enum: ['upcoming', 'completed', 'cancelled'],
+      default: 'upcoming',
     },
     createdAt: {
       type: Date,

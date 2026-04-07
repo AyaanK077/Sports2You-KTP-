@@ -4,8 +4,8 @@ import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import { getFirstName, formatDate, formatHour, getCourtById } from '../constants/data';
 import BookingCard from '../components/BookingCard';
 
-export default function HomeScreen({ user, bookings, setPage, onCancelBooking, showToast }) {
-  const myBookings = bookings.filter((b) => b.owner === 'u1');
+export default function HomeScreen({ user, bookings, facilities = {}, setPage, onCancelBooking, showToast }) {
+  const myBookings = bookings.filter((b) => b.owner === user?.id);
   const upcoming = myBookings.filter((b) => b.status === 'upcoming').slice(0, 3);
   const totalBooked = myBookings.length;
   const sportsPlayed = [...new Set(myBookings.map((b) => b.sport))].length;
@@ -71,6 +71,7 @@ export default function HomeScreen({ user, bookings, setPage, onCancelBooking, s
               <BookingCard
                 key={b.id}
                 booking={b}
+                facilities={facilities}
                 showCancel
                 onCancel={(id) => {
                   onCancelBooking(id);

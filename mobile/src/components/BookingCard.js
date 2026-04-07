@@ -3,8 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import { getCourtById, formatDate, formatHour } from '../constants/data';
 
-export default function BookingCard({ booking, onCancel, showCancel }) {
-  const court = getCourtById(booking.courtId);
+export default function BookingCard({ booking, onCancel, showCancel, facilities = {} }) {
+  const court = getCourtById(booking.courtId, facilities || {});
   const facilityName = court?.facility?.short || '';
   const courtName = court?.name || '';
   const sportLabels = {
