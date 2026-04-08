@@ -30,6 +30,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
 });
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Sports2You backend is running', status: 'ok' });
+});
 const startServer = async () => {
   try {
     await connectDB();
