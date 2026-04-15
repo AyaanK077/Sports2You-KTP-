@@ -21,6 +21,7 @@ export default function ReserveScreen({ bookings, facilities = {}, onAddBooking,
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [players, setPlayers] = useState('');
   const [teammates, setTeammates] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
   const facility = facilityId ? facilities[facilityId] : null;
@@ -60,6 +61,7 @@ export default function ReserveScreen({ bookings, facilities = {}, onAddBooking,
       players: parseInt(players),
       owner: user?.id,
       teammates: teammates.split(',').map((t) => t.trim()).filter(Boolean),
+      isPublic,
       status: 'upcoming',
     };
     onAddBooking(bookingPayload)
@@ -87,7 +89,7 @@ export default function ReserveScreen({ bookings, facilities = {}, onAddBooking,
           <TouchableOpacity style={styles.btnGhost} onPress={() => {
             setStep(0); setFacilityId(null); setCourtId(null); setSport(null);
             setCourtType(null); setDate(getTodayStr()); setSelectedSlots([]);
-            setPlayers(''); setTeammates(''); setConfirmed(false);
+            setPlayers(''); setTeammates(''); setIsPublic(false); setConfirmed(false);
           }}>
             <Text style={styles.btnGhostText}>Reserve Another</Text>
           </TouchableOpacity>
@@ -290,6 +292,24 @@ export default function ReserveScreen({ bookings, facilities = {}, onAddBooking,
               onChangeText={setTeammates}
               multiline
             />
+
+            {/* Public / Private toggle */}
+            <Text style={[styles.label, { marginTop: 24 }]}>Game Visibility</Text>
+            <Text style={styles.hint}>Public games let other players find and join your game.</Text>
+            <View style={styles.toggleRow}>
+              <TouchableOpacity
+                style={[styles.toggleBtn, !isPublic && styles.toggleBtnActive]}
+                onPress={() => setIsPublic(false)}
+              >
+                <Text style={[styles.toggleText, !isPublic && styles.toggleTextActive]}>🔒  Private</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleBtn, isPublic && styles.toggleBtnActiveGreen]}
+                onPress={() => setIsPublic(true)}
+              >
+                <Text style={[styles.toggleText, isPublic && styles.toggleTextActive]}>🌐  Public</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -310,6 +330,7 @@ export default function ReserveScreen({ bookings, facilities = {}, onAddBooking,
                   : '—',
               },
               { label: 'Players', value: players || '—' },
+              { label: 'Visibility', value: isPublic ? '🌐 Public — others can join' : '🔒 Private' },
             ].map((r) => (
               <View key={r.label} style={styles.reviewRow}>
                 <Text style={styles.reviewLabel}>{r.label}</Text>
@@ -470,6 +491,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   btnGhostText: { color: COLORS.text2, fontWeight: '700', fontSize: FONT_SIZE.md },
+
+  toggleRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  toggleBtn: {
+    flex: 1, paddingVertical: 12, borderRadius: RADIUS.md, borderWidth: 1,
+    borderColor: COLORS.border, backgroundColor: COLORS.bg3, alignItems: 'center',
+  },
+  toggleBtnActive: { borderColor: COLORS.orange, backgroundColor: 'rgba(244,124,32,0.1)' },
+  toggleBtnActiveGreen: { borderColor: COLORS.green, backgroundColor: 'rgba(57,217,138,0.1)' },
+  toggleText: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text2 },
+  toggleTextActive: { color: COLORS.text },
 
   confirmPage: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40, gap: 16 },
   confirmIcon: { fontSize: 64 },

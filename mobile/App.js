@@ -134,6 +134,14 @@ export default function App() {
     setBookings((prev) => prev.map((booking) => (booking.id === id ? { ...booking, status: 'cancelled' } : booking)));
   };
 
+  const handleJoinGame = (id) => {
+    setBookings((prev) => prev.map((b) =>
+      b.id === id
+        ? { ...b, teammates: [...(b.teammates || []), user?.name || 'Player'], players: (b.players || 0) + 1 }
+        : b
+    ));
+  };
+
   const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile'];
   const showBottomNav = isLoggedIn && LOGGED_IN_PAGES.includes(page);
 
@@ -191,6 +199,7 @@ export default function App() {
             user={user}
             bookings={bookings}
             onCancelBooking={handleCancelBooking}
+            onJoinGame={handleJoinGame}
             facilities={facilities}
           />
         );
