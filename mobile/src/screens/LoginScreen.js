@@ -4,10 +4,11 @@ import {
   SafeAreaView, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { loadUser, saveUser } from '../utils/storage';
+import { authApi } from '../utils/api';
+import { saveToken, saveUser } from '../utils/storage';
 import { getFirstName } from '../constants/data';
 
-export default function LoginScreen({ setPage, setCurrentUser, onLogin, showToast }) {
+export default function LoginScreen({ setPage, onAuthSuccess, showToast }) {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -32,27 +33,17 @@ export default function LoginScreen({ setPage, setCurrentUser, onLogin, showToas
     if (Object.keys(e).length) { setErrors(e); return; }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-
-    const stored = await loadUser();
-    if (stored && stored.email === form.email) {
-      setCurrentUser(stored);
-      onLogin();
+    try {
+      const result = await authApi.login({ email: form.email, password: form.password });
+      await saveUser(result.user);
+      await saveToken(result.token);
+      await onAuthSuccess?.({ user: result.user, token: result.token });
       setPage('home');
-      showToast(`Welcome back, ${getFirstName(stored.name)}!`, 'success');
-    } else {
-      const tempUser = {
-        id: 'u1', name: 'Demo User', email: form.email,
-        studentId: '', phone: '',
-        joinedDate: new Date().toISOString().split('T')[0],
-        preferredSport: 'basketball', favoriteLocations: ['ac'],
-      };
-      setCurrentUser(tempUser);
-      await saveUser(tempUser);
-      onLogin();
-      setPage('home');
-      showToast('Demo mode: Logged in successfully!', 'success');
+      showToast(`Welcome back, ${getFirstName(result.user.name)}!`, 'success');
+    } catch (error) {
+      showToast(error.message || 'Could not sign in', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,7 +112,7 @@ export default function LoginScreen({ setPage, setCurrentUser, onLogin, showToas
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.demo}>Demo: any email + 6+ char password</Text>
+          <Text style={styles.demo}>Use your UTD email and backend account password.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { FACILITIES } from '../constants/data';
 
-export default function LandingScreen({ setPage }) {
+export default function LandingScreen({ setPage, facilities = {} }) {
+  const facilityList = Object.values(facilities || {});
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -64,7 +64,7 @@ export default function LandingScreen({ setPage }) {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Our Facilities</Text>
           <Text style={styles.sectionTitle}>Two locations, five courts</Text>
-          {Object.values(FACILITIES).map((f) => (
+            {facilityList.map((f) => (
             <TouchableOpacity key={f.id} style={styles.venueCard} onPress={() => setPage('signup')}>
               <Text style={styles.venueName}>{f.name}</Text>
               <Text style={styles.venueDesc}>{f.description}</Text>

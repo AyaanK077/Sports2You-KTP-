@@ -3,10 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } fr
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import BookingCard from '../components/BookingCard';
 
-export default function ReservationsScreen({ bookings, onCancelBooking, showToast, setPage }) {
+export default function ReservationsScreen({ user, bookings, facilities = {}, onCancelBooking, showToast, setPage }) {
   const [tab, setTab] = useState('upcoming');
 
-  const myBookings = bookings.filter((b) => b.owner === 'u1');
+  const myBookings = bookings.filter((b) => b.owner === user?.id);
   const upcoming = myBookings.filter((b) => b.status === 'upcoming');
   const past = myBookings.filter((b) => b.status === 'completed');
   const displayed = tab === 'upcoming' ? upcoming : past;
@@ -61,6 +61,7 @@ export default function ReservationsScreen({ bookings, onCancelBooking, showToas
             <BookingCard
               key={b.id}
               booking={b}
+              facilities={facilities}
               showCancel={tab === 'upcoming'}
               onCancel={handleCancel}
             />
