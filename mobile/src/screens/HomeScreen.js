@@ -1,12 +1,16 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { getFirstName, formatDate, formatHour, getCourtById } from '../constants/data';
+import { getFirstName, formatDate, formatHour } from '../constants/data';
 import BookingCard from '../components/BookingCard';
 
-export default function HomeScreen({ user, bookings, setPage, onCancelBooking, showToast }) {
-  const myBookings = bookings.filter((b) => b.owner === 'u1');
+export default function HomeScreen({ user, bookings, facilities = {}, setPage, onCancelBooking, showToast, onJoinGame }) {
+  const myBookings = bookings.filter((b) => b.owner === user?.id);
   const upcoming = myBookings.filter((b) => b.status === 'upcoming').slice(0, 3);
+  const publicGames = bookings.filter(
+    (b) => b.isPublic && b.status === 'upcoming' && b.owner !== user?.id &&
+    !b.teammates?.includes(user?.name)
+  ).slice(0, 3);
   const totalBooked = myBookings.length;
   const sportsPlayed = [...new Set(myBookings.map((b) => b.sport))].length;
 
@@ -71,6 +75,7 @@ export default function HomeScreen({ user, bookings, setPage, onCancelBooking, s
               <BookingCard
                 key={b.id}
                 booking={b}
+                facilities={facilities}
                 showCancel
                 onCancel={(id) => {
                   onCancelBooking(id);
@@ -78,6 +83,54 @@ export default function HomeScreen({ user, bookings, setPage, onCancelBooking, s
                 }}
               />
             ))
+          )}
+        </View>
+
+        {/* Join a Public Game */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🌐 Open Games</Text>
+            <View style={styles.publicBadge}>
+              <Text style={styles.publicBadgeText}>{publicGames.length} available</Text>
+            </View>
+          </View>
+          {publicGames.length === 0 ? (
+            <View style={styles.emptyPublic}>
+              <Text style={styles.emptyText}>No open games right now</Text>
+              <Text style={styles.emptyHint}>Create a public game so others can join you!</Text>
+            </View>
+          ) : (
+            publicGames.map((b) => {
+              const facility = facilities[b.facilityId] || {};
+              const court = (facility.courts || []).find((c) => c.id === b.courtId);
+              const sportLabels = {
+                'basketball': 'Basketball', 'indoor-soccer': 'Indoor Soccer',
+                'indoor-volleyball': 'Indoor Volleyball', 'sand-volleyball': 'Sand Volleyball', 'tennis': 'Tennis',
+              };
+              return (
+                <View key={b.id} style={styles.publicGameCard}>
+                  <View style={styles.publicGameHeader}>
+                    <Text style={styles.publicGameSport}>{sportLabels[b.sport] || b.sport}</Text>
+                    <Text style={styles.publicGameTime}>{formatHour(b.startHour)} – {formatHour(b.endHour)}</Text>
+                  </View>
+                  <Text style={styles.publicGameCourt}>{court?.name || b.courtId}</Text>
+                  <Text style={styles.publicGameFacility}>{facility.name || b.facilityId}</Text>
+                  <Text style={styles.publicGameDate}>{formatDate(b.date)}</Text>
+                  <View style={styles.publicGameFooter}>
+                    <Text style={styles.publicGamePlayers}>👥 {b.players} players</Text>
+                    <TouchableOpacity
+                      style={styles.joinBtn}
+                      onPress={() => {
+                        onJoinGame && onJoinGame(b.id);
+                        showToast('You joined the game!', 'success');
+                      }}
+                    >
+                      <Text style={styles.joinBtnText}>Join Game</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })
           )}
         </View>
 
@@ -189,4 +242,33 @@ const styles = StyleSheet.create({
   quickLinkIcon: { fontSize: 20, color: COLORS.green },
   quickLinkLabel: { flex: 1, fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text },
   quickLinkArrow: { fontSize: FONT_SIZE.md, color: COLORS.text3 },
+
+  publicBadge: {
+    backgroundColor: 'rgba(57,217,138,0.12)', borderWidth: 1,
+    borderColor: COLORS.border2, borderRadius: RADIUS.full,
+    paddingHorizontal: 10, paddingVertical: 3,
+  },
+  publicBadgeText: { fontSize: FONT_SIZE.xs, color: COLORS.green, fontWeight: '700' },
+  emptyPublic: {
+    backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border,
+    borderRadius: RADIUS.lg, padding: 20, alignItems: 'center', gap: 6,
+  },
+  emptyHint: { fontSize: FONT_SIZE.xs, color: COLORS.text3, textAlign: 'center' },
+  publicGameCard: {
+    backgroundColor: COLORS.card, borderWidth: 1, borderColor: 'rgba(57,217,138,0.25)',
+    borderRadius: RADIUS.lg, padding: 16, marginBottom: 10,
+  },
+  publicGameHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  publicGameSport: { fontSize: FONT_SIZE.md, fontWeight: '800', color: COLORS.green },
+  publicGameTime: { fontSize: FONT_SIZE.sm, color: COLORS.text2, fontWeight: '600' },
+  publicGameCourt: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text, marginBottom: 2 },
+  publicGameFacility: { fontSize: FONT_SIZE.sm, color: COLORS.text3, marginBottom: 2 },
+  publicGameDate: { fontSize: FONT_SIZE.sm, color: COLORS.text2, marginBottom: 12 },
+  publicGameFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  publicGamePlayers: { fontSize: FONT_SIZE.sm, color: COLORS.text2, fontWeight: '600' },
+  joinBtn: {
+    backgroundColor: COLORS.green, paddingHorizontal: 18,
+    paddingVertical: 8, borderRadius: RADIUS.md,
+  },
+  joinBtnText: { color: '#0a1a12', fontWeight: '800', fontSize: FONT_SIZE.sm },
 });

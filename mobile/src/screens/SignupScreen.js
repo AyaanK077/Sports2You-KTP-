@@ -4,10 +4,11 @@ import {
   SafeAreaView, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { saveUser } from '../utils/storage';
-import { getFirstName, genId } from '../constants/data';
+import { authApi } from '../utils/api';
+import { saveToken, saveUser } from '../utils/storage';
+import { getFirstName } from '../constants/data';
 
-export default function SignupScreen({ setPage, setCurrentUser, onLogin, showToast }) {
+export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
   const [form, setForm] = useState({ name: '', email: '', studentId: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -34,24 +35,23 @@ export default function SignupScreen({ setPage, setCurrentUser, onLogin, showToa
     if (Object.keys(e).length) { setErrors(e); return; }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-
-    const newUser = {
-      id: genId(),
-      name: form.name.trim(),
-      email: form.email,
-      studentId: form.studentId,
-      phone: '',
-      joinedDate: new Date().toISOString().split('T')[0],
-      preferredSport: 'basketball',
-      favoriteLocations: ['ac'],
-    };
-    await saveUser(newUser);
-    setCurrentUser(newUser);
-    onLogin();
-    setPage('home');
-    showToast(`Welcome, ${getFirstName(newUser.name)}!`, 'success');
+    try {
+      const result = await authApi.signup({
+        name: form.name.trim(),
+        email: form.email,
+        studentId: form.studentId,
+        password: form.password,
+      });
+      await saveUser(result.user);
+      await saveToken(result.token);
+      await onAuthSuccess?.({ user: result.user, token: result.token });
+      setPage('home');
+      showToast(`Welcome, ${getFirstName(result.user.name)}!`, 'success');
+    } catch (error) {
+      showToast(error.message || 'Could not create your account', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fieldStyle = (field) => [

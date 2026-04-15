@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { COLORS, RADIUS, FONT_SIZE } from './src/constants/theme';
-import { INITIAL_BOOKINGS } from './src/constants/data';
-import { loadUser, loadBookings, saveBookings } from './src/utils/storage';
+import { authApi, bookingsApi, facilitiesApi } from './src/utils/api';
+import { clearUser, loadUser, loadToken, saveToken, saveUser } from './src/utils/storage';
 
 import LandingScreen from './src/screens/LandingScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -28,52 +28,118 @@ export default function App() {
   const [page, setPage] = useState('landing');
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
+  const [token, setToken] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [facilities, setFacilities] = useState({});
   const [toast, setToast] = useState(null);
 
-  // Load persisted user and bookings on startup
+  const normalizeBooking = useCallback((booking) => ({
+    id: booking._id || booking.id,
+    owner: String(booking.userId || booking.owner || ''),
+    userId: String(booking.userId || booking.owner || ''),
+    facilityId: booking.facilityId,
+    courtId: booking.courtId,
+    date: typeof booking.date === 'string' ? booking.date : new Date(booking.date).toISOString().split('T')[0],
+    startHour: booking.startHour ?? Number(String(booking.time || '0:00').split(':')[0]),
+    endHour: booking.endHour ?? (booking.startHour ?? Number(String(booking.time || '0:00').split(':')[0])) + (booking.duration || 1),
+    duration: booking.duration || 1,
+    sport: booking.sport || 'basketball',
+    courtType: booking.courtType || null,
+    players: booking.players || 1,
+    teammates: booking.teammates || [],
+    status: booking.status === 'cancelled' ? 'cancelled' : booking.status === 'completed' ? 'completed' : 'upcoming',
+  }), []);
+
+  const loadFacilities = useCallback(async () => {
+    try {
+      const result = await facilitiesApi.list();
+      const normalized = Array.isArray(result)
+        ? result.reduce((acc, facility) => {
+            acc[facility.id] = {
+              ...facility,
+              courts: facility.courts || [],
+            };
+            return acc;
+          }, {})
+        : {};
+      setFacilities(normalized);
+    } catch (error) {
+      setFacilities({});
+    }
+  }, []);
+
+  const loadBookings = useCallback(async (userId) => {
+    if (!userId) {
+      setBookings([]);
+      return;
+    }
+
+    try {
+      const result = await bookingsApi.list(userId);
+      setBookings(Array.isArray(result) ? result.map(normalizeBooking) : []);
+    } catch (error) {
+      setBookings([]);
+    }
+  }, [normalizeBooking]);
+
+  // Load persisted user, token, facilities, and bookings on startup
   useEffect(() => {
     (async () => {
       const storedUser = await loadUser();
-      const storedBookings = await loadBookings();
+      const storedToken = await loadToken();
+      await loadFacilities();
       if (storedUser) {
         setUser(storedUser);
         setIsLoggedIn(true);
+        setToken(storedToken);
         setPage('home');
-      }
-      if (storedBookings) {
-        setBookings(storedBookings);
+        await loadBookings(storedUser.id);
       }
     })();
-  }, []);
+  }, [loadBookings, loadFacilities]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleLogin = () => {
+  const handleAuthSuccess = async ({ user: nextUser, token: nextToken }) => {
+    setUser(nextUser);
+    setToken(nextToken);
     setIsLoggedIn(true);
+    setPage('home');
+    await saveUser(nextUser);
+    await saveToken(nextToken);
+    await loadBookings(nextUser.id);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setUser(null);
     setIsLoggedIn(false);
+    setToken(null);
+    setBookings([]);
     setPage('landing');
+    await clearUser();
   };
 
-  const handleAddBooking = async (booking) => {
-    const updated = [...bookings, booking];
-    setBookings(updated);
-    await saveBookings(updated);
+  const handleAddBooking = async (bookingPayload) => {
+    const created = await bookingsApi.create(bookingPayload);
+    const normalized = normalizeBooking(created);
+    setBookings((prev) => [normalized, ...prev]);
+    return normalized;
   };
 
   const handleCancelBooking = async (id) => {
-    const updated = bookings.map((b) =>
-      b.id === id ? { ...b, status: 'cancelled' } : b
-    );
-    setBookings(updated);
-    await saveBookings(updated);
+    await bookingsApi.cancel(id);
+    setBookings((prev) => prev.map((booking) => (booking.id === id ? { ...booking, status: 'cancelled' } : booking)));
+  };
+
+  const handleJoinGame = (id) => {
+    setBookings((prev) => prev.map((b) =>
+      b.id === id
+        ? { ...b, teammates: [...(b.teammates || []), user?.name || 'Player'], players: (b.players || 0) + 1 }
+        : b
+    ));
   };
 
   const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile'];
@@ -85,11 +151,11 @@ export default function App() {
     if (!isLoggedIn) {
       switch (page) {
         case 'login':
-          return <LoginScreen {...commonProps} setCurrentUser={setUser} onLogin={handleLogin} />;
+          return <LoginScreen {...commonProps} onAuthSuccess={handleAuthSuccess} />;
         case 'signup':
-          return <SignupScreen {...commonProps} setCurrentUser={setUser} onLogin={handleLogin} />;
+          return <SignupScreen {...commonProps} onAuthSuccess={handleAuthSuccess} />;
         default:
-          return <LandingScreen {...commonProps} />;
+          return <LandingScreen {...commonProps} facilities={facilities} />;
       }
     }
 
@@ -99,7 +165,9 @@ export default function App() {
           <ReserveScreen
             {...commonProps}
             bookings={bookings}
+            facilities={facilities}
             onAddBooking={handleAddBooking}
+            user={user}
           />
         );
       case 'reservations':
@@ -108,10 +176,12 @@ export default function App() {
             {...commonProps}
             bookings={bookings}
             onCancelBooking={handleCancelBooking}
+            facilities={facilities}
+            user={user}
           />
         );
       case 'facilities':
-        return <FacilitiesScreen {...commonProps} />;
+        return <FacilitiesScreen {...commonProps} facilities={facilities} />;
       case 'profile':
         return (
           <ProfileScreen
@@ -119,6 +189,7 @@ export default function App() {
             user={user}
             bookings={bookings}
             onLogout={handleLogout}
+            facilities={facilities}
           />
         );
       default:
@@ -128,6 +199,8 @@ export default function App() {
             user={user}
             bookings={bookings}
             onCancelBooking={handleCancelBooking}
+            onJoinGame={handleJoinGame}
+            facilities={facilities}
           />
         );
     }

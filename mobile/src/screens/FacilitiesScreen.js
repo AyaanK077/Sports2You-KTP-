@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { FACILITIES } from '../constants/data';
 
 function FacilityDetail({ facility, onBack, onReserve }) {
   return (
@@ -50,7 +49,7 @@ function FacilityDetail({ facility, onBack, onReserve }) {
   );
 }
 
-export default function FacilitiesScreen({ setPage }) {
+export default function FacilitiesScreen({ facilities = {}, setPage }) {
   const [selected, setSelected] = useState(null);
 
   if (selected) {
@@ -69,7 +68,7 @@ export default function FacilitiesScreen({ setPage }) {
         <Text style={styles.pageTitle}>Facilities</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        {Object.values(FACILITIES).map((f) => (
+        {Object.values(facilities || {}).map((f) => (
           <TouchableOpacity key={f.id} style={styles.facilityCard} onPress={() => setSelected(f)}>
             <View style={styles.facilityCardHeader}>
               <Text style={styles.facilityCardName}>{f.name}</Text>

@@ -68,16 +68,7 @@ export const FACILITIES = {
 
 export const DAY_MAP = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export const INITIAL_BOOKINGS = [
-  { id: 'b1', courtId: 'aci-main-left', date: '2025-07-14', startHour: 10, endHour: 11, sport: 'basketball', courtType: 'half', players: 6, owner: 'u1', teammates: ['Sam P.', 'Chris L.', 'Jordan M.', 'Riley K.', 'Morgan T.'], status: 'upcoming' },
-  { id: 'b2', courtId: 'rw-main', date: '2025-07-16', startHour: 18, endHour: 19, sport: 'indoor-volleyball', courtType: null, players: 8, owner: 'u1', teammates: ['Alex C.', 'Sam D.', 'Chris W.', 'Jordan B.', 'Riley G.', 'Morgan S.', 'Taylor F.'], status: 'upcoming' },
-  { id: 'b3', courtId: 'aci-aux', date: '2025-07-10', startHour: 14, endHour: 15, sport: 'basketball', courtType: 'full', players: 10, owner: 'u1', teammates: [], status: 'completed' },
-  { id: 'b4', courtId: 'aci-aux', date: '2025-07-18', startHour: 19, endHour: 21, sport: 'indoor-soccer', courtType: null, players: 8, owner: 'u1', teammates: ['Alex C.', 'Sam D.', 'Chris W.', 'Jordan B.', 'Riley G.', 'Morgan S.', 'Taylor F.'], status: 'upcoming' },
-  { id: 'bx1', courtId: 'aci-main-mid', date: '2025-07-14', startHour: 9, endHour: 11, sport: 'basketball', courtType: 'full', players: 8, owner: 'other', status: 'upcoming' },
-  { id: 'bx2', courtId: 'aci-main-right', date: '2025-07-14', startHour: 11, endHour: 13, sport: 'basketball', courtType: 'half', players: 6, owner: 'other', status: 'upcoming' },
-  { id: 'bx3', courtId: 'rw-main', date: '2025-07-15', startHour: 16, endHour: 18, sport: 'basketball', courtType: 'full', players: 10, owner: 'other', status: 'upcoming' },
-  { id: 'bx4', courtId: 'aco-bball-1', date: '2025-07-12', startHour: 15, endHour: 16, sport: 'basketball', courtType: 'full', players: 8, owner: 'other', status: 'upcoming' },
-];
+export const INITIAL_BOOKINGS = [];
 
 // ─── UTILITIES ────────────────────────────────────────────────────────────────
 export function formatHour(h) {
@@ -111,26 +102,26 @@ export function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export function getCourtById(id) {
-  for (const f of Object.values(FACILITIES)) {
-    const c = f.courts.find((c) => c.id === id);
+export function getCourtById(id, facilitiesMap = {}) {
+  for (const f of Object.values(facilitiesMap || {})) {
+    const c = (f.courts || []).find((court) => court.id === id);
     if (c) return { ...c, facility: f };
   }
   return null;
 }
 
-export function getSlotsForCourt(courtId, dateStr, bookings) {
+export function getSlotsForCourt(courtId, dateStr, bookings, facilitiesMap = {}) {
   const dow = getDayOfWeek(dateStr);
-  const courtInfo = getCourtById(courtId);
+  const courtInfo = getCourtById(courtId, facilitiesMap);
   if (!courtInfo) return [];
   const fac = courtInfo.facility;
-  const open = fac.openHour[dow];
-  const close = fac.closeHour[dow];
-  if (open === undefined) return [];
+  const open = fac.openHour?.[dow] ?? fac.openHour?.get?.(dow);
+  const close = fac.closeHour?.[dow] ?? fac.closeHour?.get?.(dow);
+  if (open === undefined || close === undefined) return [];
   const slots = [];
   for (let h = open; h < close; h++) {
     const booked = bookings.some(
-      (b) => b.courtId === courtId && b.date === dateStr && h >= b.startHour && h < b.endHour
+      (b) => b.status !== 'cancelled' && b.courtId === courtId && b.date === dateStr && h >= b.startHour && h < b.endHour
     );
     slots.push({ hour: h, booked });
   }
@@ -142,12 +133,12 @@ export function genId() {
 }
 
 export function getFirstName(fullName) {
-  return fullName.split(' ')[0];
+  return String(fullName || '').trim().split(' ')[0] || 'Player';
 }
 
 export function getInitials(fullName) {
-  const parts = fullName.trim().split(' ');
+  const parts = String(fullName || '').trim().split(' ').filter(Boolean);
   return parts.length >= 2
     ? (parts[0][0] + parts[1][0]).toUpperCase()
-    : parts[0].substring(0, 2).toUpperCase();
+    : (parts[0] || 'P').substring(0, 2).toUpperCase();
 }
