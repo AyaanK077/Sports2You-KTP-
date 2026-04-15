@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
@@ -14,6 +14,11 @@ export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const emailRef = useRef(null);
+  const studentIdRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmRef = useRef(null);
+
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = 'Name is required';
@@ -26,6 +31,21 @@ export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
   const handleBlur = (field) => {
     setTouched((t) => ({ ...t, [field]: true }));
     setErrors(validate());
+  };
+
+  const handleChange = (field, value) => {
+    setForm((p) => {
+      const next = { ...p, [field]: value };
+      if (touched[field]) {
+        const e = {};
+        if (!next.name.trim()) e.name = 'Name is required';
+        if (!next.email.includes('@')) e.email = 'Enter a valid email';
+        if (next.password.length < 6) e.password = 'Password must be at least 6 characters';
+        if (next.password !== next.confirm) e.confirm = 'Passwords do not match';
+        setErrors(e);
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async () => {
@@ -54,51 +74,141 @@ export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
     }
   };
 
-  const fieldStyle = (field) => [
+  const inputStyle = (field) => [
     styles.input,
-    touched[field] && (errors[field] ? styles.inputError : styles.inputValid),
-  ];
-
-  const fields = [
-    { key: 'name', label: 'Full Name', placeholder: 'Jane Smith', type: 'default' },
-    { key: 'email', label: 'UTD Email', placeholder: 'netid@utdallas.edu', type: 'email-address' },
-    { key: 'studentId', label: 'Student ID (optional)', placeholder: '2021XXXXXXX', type: 'default' },
-    { key: 'password', label: 'Password', placeholder: '••••••••', secure: true },
-    { key: 'confirm', label: 'Confirm Password', placeholder: '••••••••', secure: true },
+    touched[field] && errors[field] ? styles.inputError : null,
+    touched[field] && !errors[field] && form[field] ? styles.inputValid : null,
   ];
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.logo}>SPORTS2YOU</Text>
           <Text style={styles.subtitle}>Create your UTD student account</Text>
 
           <View style={styles.card}>
-            {fields.map((f) => (
-              <View key={f.key} style={styles.fieldGroup}>
-                <Text style={styles.label}>{f.label}</Text>
-                <TextInput
-                  style={fieldStyle(f.key)}
-                  placeholder={f.placeholder}
-                  placeholderTextColor={COLORS.text3}
-                  value={form[f.key]}
-                  onChangeText={(v) => setForm((prev) => ({ ...prev, [f.key]: v }))}
-                  onBlur={() => handleBlur(f.key)}
-                  keyboardType={f.type || 'default'}
-                  autoCapitalize={f.key === 'email' ? 'none' : 'words'}
-                  secureTextEntry={!!f.secure}
-                />
-                {touched[f.key] && errors[f.key] && (
-                  <Text style={styles.errorText}>✕ {errors[f.key]}</Text>
-                )}
-              </View>
-            ))}
+            {/* Full Name */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Full Name</Text>
+              <TextInput
+                style={inputStyle('name')}
+                placeholder="Jane Smith"
+                placeholderTextColor={COLORS.text3}
+                value={form.name}
+                onChangeText={(v) => handleChange('name', v)}
+                onBlur={() => handleBlur('name')}
+                autoCapitalize="words"
+                autoCorrect={false}
+                textContentType="name"
+                returnKeyType="next"
+                onSubmitEditing={() => emailRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+              {touched.name && errors.name && <Text style={styles.errorText}>✕ {errors.name}</Text>}
+            </View>
+
+            {/* UTD Email */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>UTD Email</Text>
+              <TextInput
+                ref={emailRef}
+                style={inputStyle('email')}
+                placeholder="you@utdallas.edu"
+                placeholderTextColor={COLORS.text3}
+                value={form.email}
+                onChangeText={(v) => handleChange('email', v)}
+                onBlur={() => handleBlur('email')}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="emailAddress"
+                returnKeyType="next"
+                onSubmitEditing={() => studentIdRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+              {touched.email && errors.email && <Text style={styles.errorText}>✕ {errors.email}</Text>}
+            </View>
+
+            {/* Student ID */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Student ID (optional)</Text>
+              <TextInput
+                ref={studentIdRef}
+                style={inputStyle('studentId')}
+                placeholder="2021XXXXXXX"
+                placeholderTextColor={COLORS.text3}
+                value={form.studentId}
+                onChangeText={(v) => handleChange('studentId', v)}
+                onBlur={() => handleBlur('studentId')}
+                keyboardType="default"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="none"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+            </View>
+
+            {/* Password */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                ref={passwordRef}
+                style={inputStyle('password')}
+                placeholder="Min. 6 characters"
+                placeholderTextColor={COLORS.text3}
+                value={form.password}
+                onChangeText={(v) => handleChange('password', v)}
+                onBlur={() => handleBlur('password')}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="oneTimeCode"
+                autoComplete="off"
+                returnKeyType="next"
+                onSubmitEditing={() => confirmRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+              {touched.password && errors.password && <Text style={styles.errorText}>✕ {errors.password}</Text>}
+            </View>
+
+            {/* Confirm Password */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                ref={confirmRef}
+                style={inputStyle('confirm')}
+                placeholder="Re-enter password"
+                placeholderTextColor={COLORS.text3}
+                value={form.confirm}
+                onChangeText={(v) => handleChange('confirm', v)}
+                onBlur={() => handleBlur('confirm')}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="oneTimeCode"
+                autoComplete="off"
+                returnKeyType="done"
+                onSubmitEditing={handleSubmit}
+              />
+              {touched.confirm && errors.confirm && <Text style={styles.errorText}>✕ {errors.confirm}</Text>}
+            </View>
 
             <TouchableOpacity
               style={[styles.btnPrimary, loading && styles.btnDisabled]}
               onPress={handleSubmit}
               disabled={loading}
+              activeOpacity={0.8}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
@@ -113,10 +223,13 @@ export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
               <View style={styles.divider} />
             </View>
 
-            <TouchableOpacity style={styles.btnGhost} onPress={() => setPage('login')}>
+            <TouchableOpacity style={styles.btnGhost} onPress={() => setPage('login')} activeOpacity={0.8}>
               <Text style={styles.btnGhostText}>Sign In</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Bottom padding so last field clears keyboard */}
+          <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -125,7 +238,7 @@ export default function SignupScreen({ setPage, onAuthSuccess, showToast }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
-  content: { padding: 28, paddingTop: 60, alignItems: 'center' },
+  content: { padding: 28, paddingTop: 60, alignItems: 'center', flexGrow: 1 },
   logo: { fontSize: 36, fontWeight: '900', color: COLORS.orange, letterSpacing: 2, marginBottom: 10 },
   subtitle: { fontSize: FONT_SIZE.md, color: COLORS.text2, marginBottom: 40 },
   card: {
@@ -143,7 +256,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
-    padding: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     fontSize: FONT_SIZE.md,
     color: COLORS.text,
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 
 export default function LandingScreen({ setPage, facilities = {} }) {
@@ -48,12 +48,12 @@ export default function LandingScreen({ setPage, facilities = {} }) {
           <Text style={styles.sectionLabel}>How it works</Text>
           <Text style={styles.sectionTitle}>Three steps to your court</Text>
           {[
-            { icon: '📅', title: 'Pick your slot', desc: 'Choose a facility, court, and time slot from real-time availability. No phone calls, no waiting.' },
-            { icon: '🏀', title: 'Set your sport', desc: 'Reserve for basketball (half or full court) or soccer. Player minimums are enforced automatically.' },
-            { icon: '✅', title: 'Confirm & play', desc: 'Add your teammates, confirm your booking, and walk in with confidence.' },
+            { iconSrc: require('../assets/calendar.png'), title: 'Pick your slot', desc: 'Choose a facility, court, and time slot from real-time availability. No phone calls, no waiting.' },
+            { iconSrc: require('../assets/basketball.png'), title: 'Set your sport', desc: 'Reserve for basketball (half or full court) or soccer. Player minimums are enforced automatically.' },
+            { iconSrc: require('../assets/tick.png'), title: 'Confirm & play', desc: 'Add your teammates, confirm your booking, and walk in with confidence.' },
           ].map((f) => (
             <View key={f.title} style={styles.featureCard}>
-              <Text style={styles.featureIcon}>{f.icon}</Text>
+              <Image source={f.iconSrc} style={{ width: 28, height: 28, marginBottom: 10 }} resizeMode="contain" />
               <Text style={styles.featureTitle}>{f.title}</Text>
               <Text style={styles.featureDesc}>{f.desc}</Text>
             </View>

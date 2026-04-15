@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
+import { ActivityIcon } from '../constants/icons';
 
 function FacilityDetail({ facility, onBack, onReserve }) {
   return (
@@ -14,7 +15,7 @@ function FacilityDetail({ facility, onBack, onReserve }) {
       </View>
       <ScrollView contentContainerStyle={styles.detailContent}>
         <Text style={styles.facilityName}>{facility.name}</Text>
-        <Text style={styles.facilityAddress}>📍 {facility.address}</Text>
+        <View style={styles.addressRow}><ActivityIcon size={14} /><Text style={styles.facilityAddress}>{facility.address}</Text></View>
         <Text style={styles.facilityDesc}>{facility.description}</Text>
 
         <Text style={styles.subTitle}>Courts</Text>
@@ -77,7 +78,7 @@ export default function FacilitiesScreen({ facilities = {}, setPage }) {
               </View>
             </View>
             <Text style={styles.facilityCardDesc}>{f.description}</Text>
-            <Text style={styles.facilityCardAddress}>📍 {f.address}</Text>
+            <View style={styles.addressRow}><ActivityIcon size={12} /><Text style={styles.facilityCardAddress}>{f.address}</Text></View>
             <View style={styles.courtList}>
               {f.courts.map((c) => (
                 <View key={c.id} style={styles.courtBadge}>
@@ -150,6 +151,7 @@ const styles = StyleSheet.create({
   backText: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.md },
   detailContent: { padding: 20, paddingBottom: 60 },
   facilityName: { fontSize: 28, fontWeight: '900', color: COLORS.text, marginBottom: 6 },
+  addressRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   facilityAddress: { fontSize: FONT_SIZE.sm, color: COLORS.text3, marginBottom: 14 },
   facilityDesc: { fontSize: FONT_SIZE.md, color: COLORS.text2, lineHeight: 24, marginBottom: 28 },
   subTitle: { fontSize: FONT_SIZE.lg, fontWeight: '800', color: COLORS.text, marginBottom: 12 },

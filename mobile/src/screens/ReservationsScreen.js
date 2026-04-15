@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
 import BookingCard from '../components/BookingCard';
 
@@ -46,7 +46,7 @@ export default function ReservationsScreen({ user, bookings, facilities = {}, on
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {displayed.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>{tab === 'upcoming' ? '📅' : '✓'}</Text>
+            <Image source={tab === 'upcoming' ? require('../assets/calendar.png') : require('../assets/tick.png')} style={{ width: 48, height: 48, opacity: 0.5, marginBottom: 4 }} resizeMode="contain" />
             <Text style={styles.emptyTitle}>
               {tab === 'upcoming' ? 'No upcoming reservations' : 'No past reservations'}
             </Text>

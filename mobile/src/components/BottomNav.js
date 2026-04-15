@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS } from '../constants/theme';
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', icon: '⌂' },
   { id: 'reserve', label: 'Reserve', icon: '+' },
+  { id: 'join-game', label: 'Games', iconImage: require('../assets/basketball.png') },
   { id: 'reservations', label: 'Bookings', icon: '◉' },
-  { id: 'facilities', label: 'Venues', icon: '◈' },
   { id: 'profile', label: 'Profile', icon: '◎' },
 ];
 
@@ -17,7 +17,11 @@ export default function BottomNav({ page, setPage }) {
         const active = page === item.id;
         return (
           <TouchableOpacity key={item.id} style={styles.item} onPress={() => setPage(item.id)}>
-            <Text style={[styles.icon, active && styles.iconActive]}>{item.icon}</Text>
+            {item.iconImage ? (
+              <Image source={item.iconImage} style={[styles.iconImage, { tintColor: active ? COLORS.green : COLORS.text3 }]} resizeMode="contain" />
+            ) : (
+              <Text style={[styles.icon, active && styles.iconActive]}>{item.icon}</Text>
+            )}
             <Text style={[styles.label, active && styles.labelActive]}>{item.label}</Text>
           </TouchableOpacity>
         );
@@ -43,6 +47,10 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 20,
     color: COLORS.text3,
+  },
+  iconImage: {
+    width: 20,
+    height: 20,
   },
   iconActive: {
     color: COLORS.green,

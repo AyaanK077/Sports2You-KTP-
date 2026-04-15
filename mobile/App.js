@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { COLORS, RADIUS, FONT_SIZE } from './src/constants/theme';
 import { authApi, bookingsApi, facilitiesApi } from './src/utils/api';
 import { clearUser, loadUser, loadToken, saveToken, saveUser } from './src/utils/storage';
+import { FACILITIES as LOCAL_FACILITIES } from './src/constants/data';
 
 import LandingScreen from './src/screens/LandingScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -13,6 +14,11 @@ import ReserveScreen from './src/screens/ReserveScreen';
 import ReservationsScreen from './src/screens/ReservationsScreen';
 import FacilitiesScreen from './src/screens/FacilitiesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import JoinGameScreen from './src/screens/JoinGameScreen';
+import GameDetailsScreen from './src/screens/GameDetailsScreen';
+import LeaveReviewScreen from './src/screens/LeaveReviewScreen';
+import MyGamesScreen from './src/screens/MyGamesScreen';
+import CreateGameScreen from './src/screens/CreateGameScreen';
 import BottomNav from './src/components/BottomNav';
 
 function Toast({ message, type }) {
@@ -32,6 +38,8 @@ export default function App() {
   const [bookings, setBookings] = useState([]);
   const [facilities, setFacilities] = useState({});
   const [toast, setToast] = useState(null);
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [joinedGameIds, setJoinedGameIds] = useState(new Set());
 
   const normalizeBooking = useCallback((booking) => ({
     id: booking._id || booking.id,
@@ -53,7 +61,7 @@ export default function App() {
   const loadFacilities = useCallback(async () => {
     try {
       const result = await facilitiesApi.list();
-      const normalized = Array.isArray(result)
+      const normalized = Array.isArray(result) && result.length > 0
         ? result.reduce((acc, facility) => {
             acc[facility.id] = {
               ...facility,
@@ -61,10 +69,10 @@ export default function App() {
             };
             return acc;
           }, {})
-        : {};
+        : LOCAL_FACILITIES;
       setFacilities(normalized);
     } catch (error) {
-      setFacilities({});
+      setFacilities(LOCAL_FACILITIES);
     }
   }, []);
 
@@ -103,6 +111,11 @@ export default function App() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const navigateToGameDetails = (game) => {
+    setSelectedGame(game);
+    setPage('game-details');
+  };
+
   const handleAuthSuccess = async ({ user: nextUser, token: nextToken }) => {
     setUser(nextUser);
     setToken(nextToken);
@@ -134,7 +147,7 @@ export default function App() {
     setBookings((prev) => prev.map((booking) => (booking.id === id ? { ...booking, status: 'cancelled' } : booking)));
   };
 
-  const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile'];
+  const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile', 'join-game', 'game-details', 'leave-review', 'my-games', 'create-game'];
   const showBottomNav = isLoggedIn && LOGGED_IN_PAGES.includes(page);
 
   const renderPage = () => {
@@ -184,6 +197,45 @@ export default function App() {
             facilities={facilities}
           />
         );
+      case 'join-game':
+        return <JoinGameScreen {...commonProps} user={user} navigateToGameDetails={navigateToGameDetails} />;
+      case 'game-details':
+        return (
+          <GameDetailsScreen
+            {...commonProps}
+            game={selectedGame}
+            hasJoined={selectedGame ? joinedGameIds.has(selectedGame.id) : false}
+            onJoined={(gameId, joined) => {
+              if (joined) {
+                setJoinedGameIds((prev) => new Set([...prev, gameId]));
+              } else {
+                setJoinedGameIds((prev) => {
+                  const updated = new Set(prev);
+                  updated.delete(gameId);
+                  return updated;
+                });
+              }
+            }}
+          />
+        );
+      case 'leave-review':
+        return (
+          <LeaveReviewScreen
+            {...commonProps}
+            game={selectedGame}
+            playerName={selectedGame?.host?.name || 'Player'}
+          />
+        );
+      case 'my-games':
+        return (
+          <MyGamesScreen
+            {...commonProps}
+            joinedGameIds={joinedGameIds}
+            navigateToGameDetails={navigateToGameDetails}
+          />
+        );
+      case 'create-game':
+        return <CreateGameScreen {...commonProps} />;
       default:
         return (
           <HomeScreen
