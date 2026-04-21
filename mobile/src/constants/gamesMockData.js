@@ -263,3 +263,139 @@ export function getGamesBySport(sport) {
   if (!sport) return MOCK_GAMES;
   return MOCK_GAMES.filter((g) => g.sport === sport);
 }
+
+// ─── Completed Games (games the current user has played in) ──────────────────
+// The "current user" marker used across completed-game rosters
+export const CURRENT_USER_ID = 'currentUser';
+
+export const MOCK_COMPLETED_GAMES = [
+  {
+    id: 'cgame1',
+    sport: 'basketball',
+    courtName: 'Main Gym – Left Court',
+    facilityName: 'AC Indoor',
+    date: '2026-04-05',
+    time: '6:00 PM',
+    duration: 2,
+    skillLevel: 'intermediate',
+    status: 'completed',
+    isPublic: true,
+    description: 'Great evening pickup. Competitive but friendly crowd.',
+    host: { id: 'player3', name: 'Morgan Davis', initials: 'MD', rating: 4.9 },
+    joinedPlayers: [
+      { id: 'player3', name: 'Morgan Davis', initials: 'MD', isHost: true, rating: 4.9 },
+      { id: 'player1', name: 'Alex Chen', initials: 'AC', rating: 4.8 },
+      { id: 'player2', name: 'Jordan Lee', initials: 'JL', rating: 4.5 },
+      { id: 'player4', name: 'Casey Mitchell', initials: 'CM', rating: 4.6 },
+      { id: CURRENT_USER_ID, name: 'You', initials: 'YO' },
+    ],
+  },
+  {
+    id: 'cgame2',
+    sport: 'indoor-volleyball',
+    courtName: 'Main Court',
+    facilityName: 'Rec West',
+    date: '2026-03-28',
+    time: '5:30 PM',
+    duration: 1.5,
+    skillLevel: 'beginner',
+    status: 'completed',
+    isPublic: true,
+    description: 'Fun and inclusive volleyball. Rotated teams every set.',
+    host: { id: 'player1', name: 'Alex Chen', initials: 'AC', rating: 4.8 },
+    joinedPlayers: [
+      { id: 'player1', name: 'Alex Chen', initials: 'AC', isHost: true, rating: 4.8 },
+      { id: 'player3', name: 'Morgan Davis', initials: 'MD', rating: 4.9 },
+      { id: 'player5', name: 'Riley Thompson', initials: 'RT', rating: 4.3 },
+      { id: 'player6', name: 'Taylor Kim', initials: 'TK', rating: 4.7 },
+      { id: CURRENT_USER_ID, name: 'You', initials: 'YO' },
+    ],
+  },
+  {
+    id: 'cgame3',
+    sport: 'indoor-soccer',
+    courtName: 'Auxiliary Gym',
+    facilityName: 'AC Indoor',
+    date: '2026-03-20',
+    time: '8:00 PM',
+    duration: 2,
+    skillLevel: 'intermediate',
+    status: 'completed',
+    isPublic: false,
+    description: 'Private 5-a-side with friends. Solid pace all night.',
+    host: { id: 'player2', name: 'Jordan Lee', initials: 'JL', rating: 4.5 },
+    joinedPlayers: [
+      { id: 'player2', name: 'Jordan Lee', initials: 'JL', isHost: true, rating: 4.5 },
+      { id: 'player1', name: 'Alex Chen', initials: 'AC', rating: 4.8 },
+      { id: 'player4', name: 'Casey Mitchell', initials: 'CM', rating: 4.6 },
+      { id: CURRENT_USER_ID, name: 'You', initials: 'YO' },
+    ],
+  },
+];
+
+// Return players in the game that the current user can review (everyone except themselves)
+export function getReviewablePlayers(game) {
+  if (!game || !Array.isArray(game.joinedPlayers)) return [];
+  return game.joinedPlayers.filter((p) => p.id !== CURRENT_USER_ID);
+}
+
+// How many players the user has already reviewed in this game
+export function countReviewedForGame(game, reviews) {
+  const players = getReviewablePlayers(game);
+  const gameReviews = reviews?.[game.id] || {};
+  return players.filter((p) => gameReviews[p.id]).length;
+}
+
+// Is this single player reviewed for this game?
+export function isPlayerReviewed(gameId, playerId, reviews) {
+  return Boolean(reviews?.[gameId]?.[playerId]);
+}
+
+// Total pending reviews across all completed games
+export function countTotalPendingReviews(completedGames, reviews) {
+  return completedGames.reduce((sum, g) => {
+    const reviewable = getReviewablePlayers(g).length;
+    const reviewed = countReviewedForGame(g, reviews);
+    return sum + (reviewable - reviewed);
+  }, 0);
+}
+
+// Build a unique list of players from completed games, with per-player
+// game-count + review-progress metadata derived from live review state.
+export function getPlayersPlayedWith(completedGames, reviews) {
+  const map = new Map();
+  completedGames.forEach((game) => {
+    getReviewablePlayers(game).forEach((player) => {
+      const existing = map.get(player.id);
+      const reviewedHere = isPlayerReviewed(game.id, player.id, reviews);
+      if (existing) {
+        existing.gamesPlayed += 1;
+        if (reviewedHere) existing.reviewedCount += 1;
+        if (!existing.sportsTogether.includes(game.sport)) {
+          existing.sportsTogether.push(game.sport);
+        }
+        if (game.date > existing.lastGameDate) {
+          existing.lastGameDate = game.date;
+          existing.latestGameId = game.id;
+        }
+        if (!reviewedHere && !existing.pendingGameId) {
+          existing.pendingGameId = game.id;
+        }
+      } else {
+        map.set(player.id, {
+          ...player,
+          sportsTogether: [game.sport],
+          gamesPlayed: 1,
+          reviewedCount: reviewedHere ? 1 : 0,
+          lastGameDate: game.date,
+          latestGameId: game.id,
+          pendingGameId: reviewedHere ? null : game.id,
+        });
+      }
+    });
+  });
+  // Most recently played first
+  return Array.from(map.values()).sort((a, b) =>
+    (b.lastGameDate || '').localeCompare(a.lastGameDate || '')
+  );
+}

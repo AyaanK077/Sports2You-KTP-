@@ -1,17 +1,70 @@
-import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, TextInput, StyleSheet, SafeAreaView } from 'react-native';
-import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
-import { StarRating } from '../constants/icons';
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
+import { COLORS, RADIUS, FONT_SIZE, LINE_HEIGHT } from '../constants/theme';
+import { SportIcon } from '../constants/icons';
 
 const REVIEW_TAGS = [
-  'Friendly', 'Reliable', 'Good Teammate', 'Competitive',
-  'Skilled', 'Respectful', 'Great Organizer', 'No-show'
+  'Friendly',
+  'Reliable',
+  'Good Teammate',
+  'Competitive',
+  'Skilled',
+  'Respectful',
+  'Great Organizer',
+  'No-show',
 ];
 
-export default function LeaveReviewScreen({ setPage, showToast, game, playerName = 'Player' }) {
-  const [rating, setRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
+/**
+ * LeaveReviewScreen
+ *
+ * Props:
+ *  - game: completed game object (used for context header)
+ *  - player: the specific player being reviewed { id, name, initials, isHost, rating }
+ *  - existingReview: if the user has already reviewed this player in this game, this holds
+ *    { rating, text, tags, date } - the form will pre-fill and act as "edit".
+ *  - onSubmitReview(gameId, playerId, review): persists the review in app state
+ *  - onDone(): called after submit/cancel - navigates back to the right place
+ *  - setPage: fallback nav
+ *  - playerName: legacy prop (still honored if `player` not provided)
+ */
+export default function LeaveReviewScreen({
+  setPage,
+  showToast,
+  game,
+  player,
+  playerName,
+  existingReview,
+  onSubmitReview,
+  onDone,
+}) {
+  const resolvedPlayer = useMemo(() => {
+    if (player) return player;
+    if (playerName) {
+      const initials = playerName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+      return { id: null, name: playerName, initials };
+    }
+    return { id: null, name: 'Player', initials: 'P' };
+  }, [player, playerName]);
+
+  const isEditing = Boolean(existingReview);
+
+  const [rating, setRating] = useState(existingReview?.rating || 0);
+  const [reviewText, setReviewText] = useState(existingReview?.text || '');
+  const [selectedTags, setSelectedTags] = useState(existingReview?.tags || []);
 
   const handleRating = (rate) => {
     setRating(rating === rate ? rate - 1 : rate);
@@ -23,38 +76,86 @@ export default function LeaveReviewScreen({ setPage, showToast, game, playerName
     );
   };
 
+  const goBack = () => {
+    if (onDone) {
+      onDone();
+    } else {
+      setPage?.('my-games');
+    }
+  };
+
   const handleSubmitReview = () => {
     if (rating === 0) {
-      showToast('Please select a rating', 'error');
+      showToast?.('Please select a rating', 'error');
       return;
     }
 
-    showToast('Review submitted successfully!', 'success');
-    setPage('my-games');
+    if (onSubmitReview && game?.id && resolvedPlayer?.id) {
+      onSubmitReview(game.id, resolvedPlayer.id, {
+        rating,
+        text: reviewText.trim(),
+        tags: selectedTags,
+      });
+    }
+
+    showToast?.(
+      isEditing ? 'Review updated' : 'Review submitted successfully!',
+      'success'
+    );
+    goBack();
   };
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
       <View style={styles.pageHeader}>
-        <TouchableOpacity onPress={() => setPage('my-games')}>
+        <TouchableOpacity onPress={goBack} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Text style={styles.backBtn}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.pageTitle}>Leave a Review</Text>
-        <View style={{ width: 40 }} />
+        <Text style={styles.pageTitle}>{isEditing ? 'Edit Review' : 'Leave a Review'}</Text>
+        <View style={{ width: 60 }} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {/* Player Info */}
         <View style={styles.playerCard}>
-          <View style={styles.playerAvatar}>
+          <View
+            style={[
+              styles.playerAvatar,
+              resolvedPlayer.isHost && { backgroundColor: COLORS.green },
+            ]}
+          >
             <Text style={styles.playerInitials}>
-              {playerName?.split(' ').map((n) => n[0]).join('').toUpperCase() || 'P'}
+              {resolvedPlayer.initials ||
+                resolvedPlayer.name
+                  ?.split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2) ||
+                'P'}
             </Text>
           </View>
-          <View>
-            <Text style={styles.playerLabel}>Reviewing</Text>
-            <Text style={styles.playerName}>{playerName}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.playerLabel}>
+              {isEditing ? 'Editing your review for' : 'Reviewing'}
+            </Text>
+            <View style={styles.playerNameRow}>
+              <Text style={styles.playerName}>{resolvedPlayer.name}</Text>
+              {resolvedPlayer.isHost && (
+                <View style={styles.hostTag}>
+                  <Text style={styles.hostTagText}>Host</Text>
+                </View>
+              )}
+            </View>
+            {game?.courtName ? (
+              <View style={styles.gameContextRow}>
+                <SportIcon sport={game.sport} size={14} />
+                <Text style={styles.gameContextText}>
+                  {game.courtName}
+                  {game.facilityName ? ` • ${game.facilityName}` : ''}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -132,9 +233,7 @@ export default function LeaveReviewScreen({ setPage, showToast, game, playerName
             multiline
             numberOfLines={4}
           />
-          <Text style={styles.charCount}>
-            {reviewText.length}/200
-          </Text>
+          <Text style={styles.charCount}>{reviewText.length}/200</Text>
         </View>
 
         {/* Action Buttons */}
@@ -142,14 +241,14 @@ export default function LeaveReviewScreen({ setPage, showToast, game, playerName
           <TouchableOpacity
             style={styles.submitButton}
             onPress={handleSubmitReview}
+            activeOpacity={0.85}
           >
-            <Text style={styles.submitButtonText}>Submit Review</Text>
+            <Text style={styles.submitButtonText}>
+              {isEditing ? 'Update Review' : 'Submit Review'}
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => setPage('my-games')}
-          >
+          <TouchableOpacity style={styles.cancelButton} onPress={goBack}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -164,37 +263,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
   backBtn: {
     fontSize: FONT_SIZE.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.green,
   },
   pageTitle: {
     fontSize: FONT_SIZE.lg,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.text,
+    letterSpacing: -0.3,
   },
   scroll: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
+  content: { padding: 22, paddingBottom: 40 },
   playerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.lg,
-    padding: 16,
+    padding: 18,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: COLORS.border2,
   },
   playerAvatar: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.orange,
     alignItems: 'center',
@@ -202,27 +302,46 @@ const styles = StyleSheet.create({
   },
   playerInitials: {
     fontSize: FONT_SIZE.md,
-    fontWeight: '600',
+    fontWeight: '800',
     color: '#fff',
   },
   playerLabel: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.text3,
+    letterSpacing: 0.2,
   },
+  playerNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   playerName: {
     fontSize: FONT_SIZE.md,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.text,
-    marginTop: 2,
+    letterSpacing: -0.2,
   },
-  section: {
-    marginBottom: 24,
+  hostTag: {
+    backgroundColor: COLORS.green,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: RADIUS.md,
   },
+  hostTagText: { fontSize: 9, fontWeight: '800', color: '#000' },
+  gameContextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+  },
+  gameContextText: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.text2,
+    lineHeight: LINE_HEIGHT?.xs || 17,
+  },
+  section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: FONT_SIZE.lg,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.text,
     marginBottom: 12,
+    letterSpacing: -0.2,
   },
   subsectionText: {
     fontSize: FONT_SIZE.sm,
@@ -234,16 +353,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
   },
-  starButton: {
-    padding: 8,
-  },
-  star: {
-    fontSize: 36,
-  },
+  starButton: { padding: 8 },
   ratingLabel: {
     textAlign: 'center',
     fontSize: FONT_SIZE.md,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.green,
     marginTop: 12,
   },
@@ -255,7 +369,7 @@ const styles = StyleSheet.create({
   tagButton: {
     backgroundColor: COLORS.bg2,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -266,21 +380,21 @@ const styles = StyleSheet.create({
   },
   tagButtonText: {
     fontSize: FONT_SIZE.sm,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.text2,
   },
-  tagButtonTextSelected: {
-    color: '#000',
-  },
+  tagButtonTextSelected: { color: '#000' },
   reviewInput: {
     backgroundColor: COLORS.bg2,
     borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.border,
     color: COLORS.text,
-    padding: 12,
+    padding: 14,
     fontSize: FONT_SIZE.md,
     textAlignVertical: 'top',
+    minHeight: 110,
+    lineHeight: LINE_HEIGHT?.md || 23,
   },
   charCount: {
     fontSize: FONT_SIZE.xs,
@@ -290,24 +404,26 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     gap: 12,
+    marginTop: 8,
     marginBottom: 32,
   },
   submitButton: {
     backgroundColor: COLORS.green,
     borderRadius: RADIUS.lg,
-    padding: 14,
+    padding: 16,
     alignItems: 'center',
   },
   submitButtonText: {
     fontSize: FONT_SIZE.md,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#000',
+    letterSpacing: 0.2,
   },
   cancelButton: {
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: COLORS.text3,
     borderRadius: RADIUS.lg,
-    padding: 12,
+    padding: 14,
     alignItems: 'center',
   },
   cancelButtonText: {

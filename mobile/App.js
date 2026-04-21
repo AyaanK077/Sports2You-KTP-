@@ -19,6 +19,7 @@ import GameDetailsScreen from './src/screens/GameDetailsScreen';
 import LeaveReviewScreen from './src/screens/LeaveReviewScreen';
 import MyGamesScreen from './src/screens/MyGamesScreen';
 import CreateGameScreen from './src/screens/CreateGameScreen';
+import CompletedGameReviewScreen from './src/screens/CompletedGameReviewScreen';
 import BottomNav from './src/components/BottomNav';
 
 function Toast({ message, type }) {
@@ -40,6 +41,31 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const [joinedGameIds, setJoinedGameIds] = useState(new Set());
+  // Review state: { [gameId]: { [playerId]: { rating, text, tags, date } } }
+  const [reviews, setReviews] = useState({});
+  const [selectedCompletedGame, setSelectedCompletedGame] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  const submitReview = useCallback((gameId, playerId, review) => {
+    setReviews((prev) => ({
+      ...prev,
+      [gameId]: {
+        ...(prev[gameId] || {}),
+        [playerId]: { ...review, date: new Date().toISOString() },
+      },
+    }));
+  }, []);
+
+  const navigateToCompletedGame = useCallback((game) => {
+    setSelectedCompletedGame(game);
+    setPage('completed-game-review');
+  }, []);
+
+  const navigateToPlayerReview = useCallback((game, player) => {
+    setSelectedCompletedGame(game);
+    setSelectedPlayer(player);
+    setPage('leave-review');
+  }, []);
 
   const normalizeBooking = useCallback((booking) => ({
     id: booking._id || booking.id,
@@ -147,7 +173,7 @@ export default function App() {
     setBookings((prev) => prev.map((booking) => (booking.id === id ? { ...booking, status: 'cancelled' } : booking)));
   };
 
-  const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile', 'join-game', 'game-details', 'leave-review', 'my-games', 'create-game'];
+  const LOGGED_IN_PAGES = ['home', 'reserve', 'reservations', 'facilities', 'profile', 'join-game', 'game-details', 'leave-review', 'my-games', 'create-game', 'completed-game-review'];
   const showBottomNav = isLoggedIn && LOGGED_IN_PAGES.includes(page);
 
   const renderPage = () => {
@@ -195,6 +221,9 @@ export default function App() {
             bookings={bookings}
             onLogout={handleLogout}
             facilities={facilities}
+            reviews={reviews}
+            navigateToCompletedGame={navigateToCompletedGame}
+            navigateToPlayerReview={navigateToPlayerReview}
           />
         );
       case 'join-game':
@@ -222,8 +251,32 @@ export default function App() {
         return (
           <LeaveReviewScreen
             {...commonProps}
-            game={selectedGame}
-            playerName={selectedGame?.host?.name || 'Player'}
+            game={selectedCompletedGame || selectedGame}
+            player={selectedPlayer || (selectedGame?.host ? selectedGame.host : null)}
+            existingReview={
+              selectedCompletedGame && selectedPlayer
+                ? reviews?.[selectedCompletedGame.id]?.[selectedPlayer.id] || null
+                : null
+            }
+            onSubmitReview={submitReview}
+            onDone={() => {
+              if (selectedCompletedGame) {
+                setSelectedPlayer(null);
+                setPage('completed-game-review');
+              } else {
+                setPage('my-games');
+              }
+            }}
+          />
+        );
+      case 'completed-game-review':
+        return (
+          <CompletedGameReviewScreen
+            {...commonProps}
+            game={selectedCompletedGame}
+            reviews={reviews}
+            onReviewPlayer={(player) => navigateToPlayerReview(selectedCompletedGame, player)}
+            onBack={() => setPage('profile')}
           />
         );
       case 'my-games':

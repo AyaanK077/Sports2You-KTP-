@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {
-  View, Text, Image, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, SafeAreaView,
+  View, Text, Image, ImageBackground, ScrollView, TouchableOpacity,
+  TextInput, StyleSheet, SafeAreaView,
 } from 'react-native';
-import { COLORS, RADIUS, FONT_SIZE } from '../constants/theme';
+import { COLORS, RADIUS, FONT_SIZE, LINE_HEIGHT } from '../constants/theme';
 import {
   FACILITIES, getTodayStr, addDays, getDayOfWeek,
   formatDate, formatHour, getSlotsForCourt, getCourtById, genId,
 } from '../constants/data';
-import { SportIcon, CalendarIcon, ClockIcon, ActivityIcon, TickIcon } from '../constants/icons';
+import { SportIcon, TickIcon } from '../constants/icons';
 
 const STEPS = ['Location', 'Court', 'Sport', 'Date & Time', 'Visibility', 'Players', 'Review'];
 
@@ -159,63 +159,109 @@ export default function ReserveScreen({ bookings, facilities: propFacilities, on
         {/* Step 0: Location */}
         {step === 0 && (
           <View style={s.options}>
-            {Object.values(facilities).map((f) => (
-              <TouchableOpacity
-                key={f.id}
-                style={[s.optionCard, data.facilityId === f.id && s.optionCardActive]}
-                onPress={() => { update('facilityId', f.id); update('courtId', ''); update('sport', ''); update('courtType', ''); }}
-              >
-                <View style={s.facilityHeader}>
-                  <ActivityIcon size={24} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.optionTitle}>{f.name}</Text>
-                    <Text style={s.optionSub}>{f.short}</Text>
+            {Object.values(facilities).map((f) => {
+              const isActive = data.facilityId === f.id;
+              return (
+                <TouchableOpacity
+                  key={f.id}
+                  style={[s.facilityCard, isActive && s.facilityCardActive]}
+                  onPress={() => { update('facilityId', f.id); update('courtId', ''); update('sport', ''); update('courtType', ''); }}
+                  activeOpacity={0.85}
+                >
+                  {f.heroImage && (
+                    <ImageBackground
+                      source={f.heroImage}
+                      style={s.facilityHero}
+                      imageStyle={s.facilityHeroImage}
+                      resizeMode="cover"
+                    >
+                      <View style={s.facilityHeroOverlay}>
+                        {isActive && <View style={s.checkDot}><Text style={s.checkDotText}>✓</Text></View>}
+                      </View>
+                    </ImageBackground>
+                  )}
+                  <View style={s.facilityBody}>
+                    <View style={s.facilityHeader}>
+                      {f.image ? <Image source={f.image} style={{ width: 22, height: 22 }} resizeMode="contain" /> : <ActivityIcon size={22} />}
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.optionTitle}>{f.name}</Text>
+                        <Text style={s.optionSub}>{f.short}</Text>
+                      </View>
+                    </View>
+                    <Text style={s.optionDesc}>{f.description}</Text>
+                    <View style={s.facilityMeta}>
+                      <Text style={s.metaText}>{f.courts.length} court{f.courts.length !== 1 ? 's' : ''}</Text>
+                      <Text style={s.metaDot}>·</Text>
+                      <Text style={s.metaText}>{[...new Set(f.courts.flatMap(c => c.sports))].length} sport{[...new Set(f.courts.flatMap(c => c.sports))].length !== 1 ? 's' : ''}</Text>
+                    </View>
+                    <Text style={s.optionAddress}>{f.address}</Text>
                   </View>
-                  {data.facilityId === f.id && <View style={s.checkDot}><Text style={s.checkDotText}>✓</Text></View>}
-                </View>
-                <Text style={s.optionDesc}>{f.description}</Text>
-                <View style={s.facilityMeta}>
-                  <Text style={s.metaText}>{f.courts.length} court{f.courts.length !== 1 ? 's' : ''}</Text>
-                  <Text style={s.metaDot}>·</Text>
-                  <Text style={s.metaText}>{[...new Set(f.courts.flatMap(c => c.sports))].length} sport{[...new Set(f.courts.flatMap(c => c.sports))].length !== 1 ? 's' : ''}</Text>
-                </View>
-                <Text style={s.optionAddress}>{f.address}</Text>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
 
         {/* Step 1: Court */}
         {step === 1 && facility && (
           <View style={s.options}>
-            {facility.courts.map((c) => (
-              <TouchableOpacity
-                key={c.id}
-                style={[s.optionCard, data.courtId === c.id && s.optionCardActive]}
-                onPress={() => { update('courtId', c.id); update('sport', ''); update('courtType', ''); }}
-              >
-                <View style={s.courtHeader}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.optionTitle}>{c.name}</Text>
-                    <Text style={s.optionSub}>{c.gym}</Text>
-                  </View>
-                  {data.courtId === c.id && <View style={s.checkDot}><Text style={s.checkDotText}>✓</Text></View>}
-                </View>
-                <View style={s.sportBadges}>
-                  {c.sports.map((sp) => (
-                    <View key={sp} style={s.sportBadge}>
-                      <Text style={s.sportBadgeText}>{(SPORT_META[sp] || { label: sp }).label}</Text>
+            {facility.courts.map((c) => {
+              const isActive = data.courtId === c.id;
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  style={[s.courtCard, isActive && s.courtCardActive]}
+                  onPress={() => { update('courtId', c.id); update('sport', ''); update('courtType', ''); }}
+                  activeOpacity={0.85}
+                >
+                  {c.previewImage && (
+                    <Image
+                      source={c.previewImage}
+                      style={s.courtPreviewImage}
+                      resizeMode="cover"
+                    />
+                  )}
+                  <View style={s.courtBody}>
+                    <View style={s.courtHeader}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.optionTitle}>{c.name}</Text>
+                        <Text style={s.optionSub}>{c.gym}</Text>
+                      </View>
+                      {isActive && <View style={s.checkDot}><Text style={s.checkDotText}>✓</Text></View>}
                     </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            ))}
+                    <View style={s.sportBadges}>
+                      {c.sports.map((sp) => (
+                        <View key={sp} style={s.sportBadge}>
+                          <Text style={s.sportBadgeText}>{(SPORT_META[sp] || { label: sp }).label}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
 
         {/* Step 2: Sport */}
         {step === 2 && court && (
           <View style={s.options}>
+            {court.previewImage && (
+              <View style={s.courtPreviewCard}>
+                <Image
+                  source={court.previewImage}
+                  style={[
+                    s.courtPreviewLarge,
+                    court.id?.startsWith('aco-svb') && { height: 220 },
+                  ]}
+                  resizeMode="cover"
+                />
+                <View style={s.courtPreviewLabel}>
+                  <Text style={s.courtPreviewLabelText}>{court.name}</Text>
+                  <Text style={s.courtPreviewSubText}>{facility?.name}</Text>
+                </View>
+              </View>
+            )}
             {court.sports.map((sp) => {
               const meta = SPORT_META[sp] || { label: sp, hint: '' };
               return (
@@ -518,19 +564,31 @@ export default function ReserveScreen({ bookings, facilities: propFacilities, on
 
       {/* Bottom action */}
       <View style={s.footer}>
-        {step < STEPS.length - 1 ? (
-          <TouchableOpacity
-            style={[s.btnPrimary, !canProceed() && s.btnDisabled]}
-            disabled={!canProceed()}
-            onPress={() => setStep(step + 1)}
-          >
-            <Text style={s.btnPrimaryText}>Continue →</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={s.btnGreen} onPress={handleConfirm}>
-            <Text style={s.btnGreenText}>Confirm Reservation</Text>
-          </TouchableOpacity>
-        )}
+        <View style={s.footerButtons}>
+          {step > 0 && (
+            <TouchableOpacity
+              style={s.btnBack}
+              onPress={() => setStep(step - 1)}
+              activeOpacity={0.7}
+            >
+              <Text style={s.btnBackText}>← Back</Text>
+            </TouchableOpacity>
+          )}
+          {step < STEPS.length - 1 ? (
+            <TouchableOpacity
+              style={[s.btnPrimary, { flex: 1 }, !canProceed() && s.btnDisabled]}
+              disabled={!canProceed()}
+              onPress={() => setStep(step + 1)}
+              activeOpacity={0.8}
+            >
+              <Text style={s.btnPrimaryText}>Continue →</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={[s.btnGreen, { flex: 1 }]} onPress={handleConfirm} activeOpacity={0.8}>
+              <Text style={s.btnGreenText}>Confirm Reservation</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -538,112 +596,132 @@ export default function ReserveScreen({ bookings, facilities: propFacilities, on
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  backText: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.md },
-  stepLabel: { fontSize: FONT_SIZE.sm, color: COLORS.text3, fontWeight: '600' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  backText: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.md, letterSpacing: 0.2 },
+  stepLabel: { fontSize: FONT_SIZE.sm, color: COLORS.text3, fontWeight: '600', letterSpacing: 0.3 },
   progressBar: { height: 3, backgroundColor: COLORS.bg3 },
   progressFill: { height: 3, backgroundColor: COLORS.orange },
-  stepTitle: { fontSize: FONT_SIZE.xxl, fontWeight: '900', color: COLORS.text, padding: 20, paddingBottom: 8 },
+  stepTitle: { fontSize: 30, fontWeight: '900', color: COLORS.text, paddingHorizontal: 22, paddingTop: 22, paddingBottom: 6, letterSpacing: -0.3 },
   scroll: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 48 },
 
-  options: { gap: 12 },
-  optionCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.lg, padding: 18 },
+  options: { gap: 16 },
+  optionCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.lg, padding: 20 },
   optionCardActive: { borderColor: COLORS.green, backgroundColor: 'rgba(57,217,138,0.08)' },
-  optionTitle: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text, marginBottom: 2 },
-  optionSub: { fontSize: FONT_SIZE.sm, color: COLORS.text2, marginTop: 2 },
-  optionDesc: { fontSize: FONT_SIZE.sm, color: COLORS.text2, lineHeight: 20, marginTop: 10 },
-  optionAddress: { fontSize: FONT_SIZE.xs, color: COLORS.text3, marginTop: 8 },
+  optionTitle: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text, marginBottom: 3, letterSpacing: -0.2 },
+  optionSub: { fontSize: FONT_SIZE.sm, color: COLORS.text2, marginTop: 3, lineHeight: LINE_HEIGHT.sm },
+  optionDesc: { fontSize: FONT_SIZE.sm, color: COLORS.text2, lineHeight: LINE_HEIGHT.sm + 2, marginTop: 12 },
+  optionAddress: { fontSize: FONT_SIZE.xs, color: COLORS.text3, marginTop: 10, lineHeight: LINE_HEIGHT.xs },
 
-  facilityHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  facilityMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
-  metaText: { fontSize: FONT_SIZE.xs, color: COLORS.green, fontWeight: '700' },
+  facilityCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.lg, overflow: 'hidden' },
+  facilityCardActive: { borderColor: COLORS.green, backgroundColor: 'rgba(57,217,138,0.08)' },
+  facilityHero: { width: '100%', height: 150 },
+  facilityHeroImage: { borderTopLeftRadius: RADIUS.lg - 1, borderTopRightRadius: RADIUS.lg - 1 },
+  facilityHeroOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)', justifyContent: 'flex-start', alignItems: 'flex-end', padding: 12 },
+  facilityBody: { padding: 18 },
+  facilityHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  facilityMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  metaText: { fontSize: FONT_SIZE.xs, color: COLORS.green, fontWeight: '700', letterSpacing: 0.3 },
   metaDot: { color: COLORS.text3 },
 
-  courtHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
-  sportBadges: { flexDirection: 'row', gap: 6, marginTop: 4, flexWrap: 'wrap' },
-  sportBadge: { backgroundColor: COLORS.bg3, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.full, paddingHorizontal: 8, paddingVertical: 3 },
+  courtCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.lg, overflow: 'hidden' },
+  courtCardActive: { borderColor: COLORS.green, backgroundColor: 'rgba(57,217,138,0.08)' },
+  courtPreviewImage: { width: '100%', height: 130 },
+  courtBody: { padding: 18 },
+  courtHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
+
+  courtPreviewCard: { borderRadius: RADIUS.lg, overflow: 'hidden', marginBottom: 20, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border },
+  courtPreviewLarge: { width: '100%', height: 190 },
+  courtPreviewLabel: { padding: 14 },
+  courtPreviewLabelText: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text, letterSpacing: -0.2 },
+  courtPreviewSubText: { fontSize: FONT_SIZE.sm, color: COLORS.text3, marginTop: 4, lineHeight: LINE_HEIGHT.sm },
+
+  sportBadges: { flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap' },
+  sportBadge: { backgroundColor: COLORS.bg3, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.full, paddingHorizontal: 10, paddingVertical: 5 },
   sportBadgeText: { fontSize: FONT_SIZE.xs, color: COLORS.text2, fontWeight: '600' },
 
-  sportOptionRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  sportOptionRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
 
-  checkDot: { width: 24, height: 24, borderRadius: 12, backgroundColor: COLORS.green, alignItems: 'center', justifyContent: 'center' },
-  checkDotText: { color: '#000', fontWeight: '800', fontSize: 12 },
+  checkDot: { width: 26, height: 26, borderRadius: 13, backgroundColor: COLORS.green, alignItems: 'center', justifyContent: 'center' },
+  checkDotText: { color: '#000', fontWeight: '800', fontSize: 13 },
 
-  subSectionTitle: { fontSize: FONT_SIZE.md, fontWeight: '800', color: COLORS.text, marginBottom: 12 },
+  subSectionTitle: { fontSize: FONT_SIZE.md, fontWeight: '800', color: COLORS.text, marginBottom: 14, letterSpacing: -0.1 },
 
-  dateScroll: { marginBottom: 8 },
-  dateChip: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 10, alignItems: 'center', marginRight: 8, minWidth: 56 },
+  dateScroll: { marginBottom: 12 },
+  dateChip: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 12, alignItems: 'center', marginRight: 10, minWidth: 58 },
   dateChipActive: { backgroundColor: COLORS.orange, borderColor: COLORS.orange },
-  dateChipDay: { fontSize: FONT_SIZE.xs, color: COLORS.text3, fontWeight: '700', textTransform: 'uppercase' },
+  dateChipDay: { fontSize: FONT_SIZE.xs, color: COLORS.text3, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
   dateChipNum: { fontSize: FONT_SIZE.lg, fontWeight: '900', color: COLORS.text },
   dateChipTextActive: { color: '#fff' },
 
-  slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  slotChip: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingHorizontal: 12, paddingVertical: 8 },
+  slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  slotChip: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 10 },
   slotBooked: { backgroundColor: COLORS.bg3, opacity: 0.4 },
   slotSelected: { backgroundColor: COLORS.green, borderColor: COLORS.green },
   slotText: { fontSize: FONT_SIZE.sm, color: COLORS.text, fontWeight: '600' },
   slotTextBooked: { color: COLORS.text3 },
   slotTextSelected: { color: '#0a1a12', fontWeight: '800' },
-  slotSummary: { marginTop: 14, fontSize: FONT_SIZE.sm, color: COLORS.green, fontWeight: '700' },
-  noSlots: { fontSize: FONT_SIZE.md, color: COLORS.text2, textAlign: 'center', marginVertical: 40 },
+  slotSummary: { marginTop: 16, fontSize: FONT_SIZE.sm, color: COLORS.green, fontWeight: '700', lineHeight: LINE_HEIGHT.sm },
+  noSlots: { fontSize: FONT_SIZE.md, color: COLORS.text2, textAlign: 'center', marginVertical: 48, lineHeight: LINE_HEIGHT.md },
 
-  durationChip: { flex: 1, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingVertical: 12, alignItems: 'center' },
+  durationChip: { flex: 1, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingVertical: 14, alignItems: 'center' },
   durationChipActive: { backgroundColor: COLORS.orange, borderColor: COLORS.orange },
   durationText: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text2 },
   durationTextActive: { color: '#fff' },
 
-  label: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
-  hint: { fontSize: FONT_SIZE.sm, color: COLORS.text3, marginBottom: 10 },
-  input: { backgroundColor: COLORS.bg3, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: 14, fontSize: FONT_SIZE.md, color: COLORS.text },
-  charCount: { fontSize: FONT_SIZE.xs, color: COLORS.text3, marginTop: 6, textAlign: 'right' },
-  fieldGroup: { marginBottom: 16 },
-  sectionHeading: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text, marginBottom: 16 },
+  label: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text, marginBottom: 10, letterSpacing: -0.1 },
+  hint: { fontSize: FONT_SIZE.sm, color: COLORS.text3, marginBottom: 12, lineHeight: LINE_HEIGHT.sm },
+  input: { backgroundColor: COLORS.bg3, borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: 15, fontSize: FONT_SIZE.md, color: COLORS.text, lineHeight: LINE_HEIGHT.md },
+  charCount: { fontSize: FONT_SIZE.xs, color: COLORS.text3, marginTop: 8, textAlign: 'right' },
+  fieldGroup: { marginBottom: 20 },
+  sectionHeading: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text, marginBottom: 20, letterSpacing: -0.3 },
 
-  visibilityCard: { flex: 1, padding: 16, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.bg2 },
+  visibilityCard: { flex: 1, padding: 18, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.bg2 },
   visibilityCardActive: { borderColor: COLORS.green, backgroundColor: 'rgba(57,217,138,0.08)' },
-  visibilityLabel: { fontWeight: '700', color: COLORS.text, marginBottom: 4, fontSize: FONT_SIZE.md },
-  visibilityDesc: { fontSize: FONT_SIZE.xs, color: COLORS.text3 },
+  visibilityLabel: { fontWeight: '700', color: COLORS.text, marginBottom: 6, fontSize: FONT_SIZE.md, letterSpacing: -0.1 },
+  visibilityDesc: { fontSize: FONT_SIZE.xs, color: COLORS.text3, lineHeight: LINE_HEIGHT.xs },
 
-  skillChip: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.bg2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  skillChip: { paddingHorizontal: 16, paddingVertical: 14, borderRadius: RADIUS.md, borderWidth: 2, borderColor: COLORS.border, backgroundColor: COLORS.bg2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   skillChipActive: { borderColor: COLORS.orange, backgroundColor: 'rgba(244,124,32,0.08)' },
   skillLabel: { fontWeight: '700', color: COLORS.text2, fontSize: FONT_SIZE.md },
-  skillDesc: { fontSize: FONT_SIZE.sm, color: COLORS.text3 },
+  skillDesc: { fontSize: FONT_SIZE.sm, color: COLORS.text3, lineHeight: LINE_HEIGHT.sm },
 
-  infoCard: { backgroundColor: 'rgba(57,217,138,0.06)', borderWidth: 1, borderColor: 'rgba(57,217,138,0.2)', borderRadius: RADIUS.md, padding: 14 },
-  infoCardText: { fontSize: FONT_SIZE.sm, color: COLORS.text2, lineHeight: 20 },
+  infoCard: { backgroundColor: 'rgba(57,217,138,0.06)', borderWidth: 1, borderColor: 'rgba(57,217,138,0.2)', borderRadius: RADIUS.md, padding: 16 },
+  infoCardText: { fontSize: FONT_SIZE.sm, color: COLORS.text2, lineHeight: LINE_HEIGHT.sm + 2 },
 
-  teammateRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  removeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(247,95,95,0.15)', alignItems: 'center', justifyContent: 'center' },
+  teammateRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  removeBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(247,95,95,0.15)', alignItems: 'center', justifyContent: 'center' },
   removeBtnText: { color: COLORS.red, fontWeight: '700', fontSize: 14 },
-  addTeammateBtn: { paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, borderStyle: 'dashed', marginTop: 4, marginBottom: 16 },
+  addTeammateBtn: { paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, borderStyle: 'dashed', marginTop: 6, marginBottom: 20 },
   addTeammateBtnText: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.sm },
-  playerSummary: { backgroundColor: COLORS.bg2, borderRadius: RADIUS.md, padding: 12, alignItems: 'center' },
-  playerSummaryText: { color: COLORS.text2, fontWeight: '600', fontSize: FONT_SIZE.sm },
-  validationError: { color: COLORS.red, fontWeight: '700', fontSize: FONT_SIZE.sm, marginTop: 12, textAlign: 'center' },
+  playerSummary: { backgroundColor: COLORS.bg2, borderRadius: RADIUS.md, padding: 14, alignItems: 'center' },
+  playerSummaryText: { color: COLORS.text2, fontWeight: '600', fontSize: FONT_SIZE.sm, lineHeight: LINE_HEIGHT.sm },
+  validationError: { color: COLORS.red, fontWeight: '700', fontSize: FONT_SIZE.sm, marginTop: 14, textAlign: 'center', lineHeight: LINE_HEIGHT.sm },
 
-  reviewCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border2, borderRadius: RADIUS.lg, padding: 20, gap: 4 },
-  reviewTitle: { fontSize: FONT_SIZE.lg, fontWeight: '800', color: COLORS.text, marginBottom: 12 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.full },
+  reviewCard: { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border2, borderRadius: RADIUS.lg, padding: 22, gap: 6 },
+  reviewTitle: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text, marginBottom: 14, letterSpacing: -0.3 },
+  badge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: RADIUS.full },
   badgeText: { fontSize: FONT_SIZE.xs, fontWeight: '700' },
-  reviewRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  reviewRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   reviewLabel: { fontSize: FONT_SIZE.sm, color: COLORS.text3, fontWeight: '600' },
-  reviewValue: { fontSize: FONT_SIZE.sm, color: COLORS.text, fontWeight: '700', maxWidth: '55%', textAlign: 'right' },
-  reviewDescBlock: { marginTop: 12, padding: 12, backgroundColor: COLORS.bg2, borderRadius: RADIUS.md },
-  reviewDescLabel: { fontSize: FONT_SIZE.xs, color: COLORS.text3, fontWeight: '700', marginBottom: 6 },
-  reviewDescText: { fontSize: FONT_SIZE.sm, color: COLORS.text, lineHeight: 20 },
+  reviewValue: { fontSize: FONT_SIZE.sm, color: COLORS.text, fontWeight: '700', maxWidth: '55%', textAlign: 'right', lineHeight: LINE_HEIGHT.sm },
+  reviewDescBlock: { marginTop: 14, padding: 14, backgroundColor: COLORS.bg2, borderRadius: RADIUS.md },
+  reviewDescLabel: { fontSize: FONT_SIZE.xs, color: COLORS.text3, fontWeight: '700', marginBottom: 8, letterSpacing: 0.3, textTransform: 'uppercase' },
+  reviewDescText: { fontSize: FONT_SIZE.sm, color: COLORS.text, lineHeight: LINE_HEIGHT.sm + 2 },
 
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border },
-  btnPrimary: { backgroundColor: COLORS.orange, borderRadius: RADIUS.md, paddingVertical: 16, alignItems: 'center' },
+  footer: { paddingHorizontal: 20, paddingVertical: 16, borderTopWidth: 1, borderTopColor: COLORS.border },
+  footerButtons: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  btnBack: { borderWidth: 1, borderColor: COLORS.border2, borderRadius: RADIUS.md, paddingVertical: 16, paddingHorizontal: 22, backgroundColor: 'rgba(57,217,138,0.06)' },
+  btnBackText: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.md },
+  btnPrimary: { backgroundColor: COLORS.orange, borderRadius: RADIUS.md, paddingVertical: 17, alignItems: 'center' },
   btnDisabled: { opacity: 0.4 },
-  btnPrimaryText: { color: '#fff', fontSize: FONT_SIZE.lg, fontWeight: '800' },
-  btnGreen: { backgroundColor: COLORS.green, borderRadius: RADIUS.md, paddingVertical: 16, alignItems: 'center' },
-  btnGreenText: { color: '#0a1a12', fontSize: FONT_SIZE.lg, fontWeight: '900' },
-  btnGhost: { borderWidth: 1, borderColor: COLORS.border2, borderRadius: RADIUS.md, paddingVertical: 14, alignItems: 'center', marginTop: 10 },
+  btnPrimaryText: { color: '#fff', fontSize: FONT_SIZE.lg, fontWeight: '800', letterSpacing: 0.2 },
+  btnGreen: { backgroundColor: COLORS.green, borderRadius: RADIUS.md, paddingVertical: 17, alignItems: 'center' },
+  btnGreenText: { color: '#0a1a12', fontSize: FONT_SIZE.lg, fontWeight: '900', letterSpacing: 0.2 },
+  btnGhost: { borderWidth: 1, borderColor: COLORS.border2, borderRadius: RADIUS.md, paddingVertical: 15, alignItems: 'center', marginTop: 12 },
   btnGhostText: { color: COLORS.text2, fontWeight: '700', fontSize: FONT_SIZE.md },
 
-  confirmPage: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40, gap: 16 },
-  confirmTitle: { fontSize: 32, fontWeight: '900', color: COLORS.text },
-  confirmSub: { fontSize: FONT_SIZE.md, color: COLORS.text2, textAlign: 'center' },
+  confirmPage: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 44, gap: 20 },
+  confirmTitle: { fontSize: 34, fontWeight: '900', color: COLORS.text, letterSpacing: -0.5 },
+  confirmSub: { fontSize: FONT_SIZE.md, color: COLORS.text2, textAlign: 'center', lineHeight: LINE_HEIGHT.md },
 });

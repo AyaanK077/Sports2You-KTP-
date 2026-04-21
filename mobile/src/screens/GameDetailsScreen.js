@@ -200,11 +200,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scroll: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
+  content: { padding: 20, paddingBottom: 40 },
   heroSection: {
     alignItems: 'center',
-    paddingVertical: 24,
-    marginBottom: 16,
+    paddingVertical: 28,
+    marginBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -224,12 +224,13 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.text,
     textAlign: 'center',
+    letterSpacing: -0.3,
   },
   infoCard: {
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.lg,
-    padding: 16,
-    marginBottom: 20,
+    padding: 18,
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: COLORS.border2,
   },
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 13,
   },
   infoLabel: {
     fontSize: FONT_SIZE.md,
@@ -261,13 +262,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionTitle: {
     fontSize: FONT_SIZE.lg,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 12,
+    marginBottom: 14,
+    letterSpacing: -0.2,
   },
   hostCard: {
     backgroundColor: COLORS.card,
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: FONT_SIZE.md,
     color: COLORS.text,
-    lineHeight: 24,
+    lineHeight: 25,
   },
   spotsSection: {
     backgroundColor: COLORS.green,

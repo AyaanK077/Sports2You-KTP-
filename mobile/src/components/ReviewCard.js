@@ -46,15 +46,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.bg2,
     borderRadius: RADIUS.md,
-    padding: 12,
-    marginBottom: 8,
+    padding: 14,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
     gap: 10,
   },
   avatarSmall: {
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: FONT_SIZE.sm,
     color: COLORS.text,
-    lineHeight: 18,
+    lineHeight: 21,
   },
   compactContainer: {
     paddingBottom: 8,

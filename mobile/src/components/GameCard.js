@@ -89,8 +89,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.lg,
-    padding: 16,
-    marginBottom: 12,
+    padding: 18,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: COLORS.border2,
   },
@@ -98,34 +98,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sportRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    gap: 10,
+    marginBottom: 5,
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
   },
   courtInfo: {
     fontSize: FONT_SIZE.md,
     fontWeight: '600',
     color: COLORS.text,
     flex: 1,
+    lineHeight: 22,
   },
   facilityName: {
     fontSize: FONT_SIZE.sm,
     color: COLORS.text2,
     marginLeft: 28,
+    marginTop: 2,
   },
   dateTime: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 12,
+    gap: 18,
+    marginBottom: 14,
   },
   date: {
     fontSize: FONT_SIZE.sm,
@@ -139,8 +141,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 12,
-    paddingBottom: 12,
+    marginBottom: 14,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -163,7 +165,8 @@ const styles = StyleSheet.create({
   hostLabel: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.text3,
-    marginBottom: 2,
+    marginBottom: 3,
+    letterSpacing: 0.3,
   },
   hostName: {
     fontSize: FONT_SIZE.md,
@@ -173,7 +176,7 @@ const styles = StyleSheet.create({
   hostRating: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.text2,
-    marginTop: 2,
+    marginTop: 3,
   },
   playersCount: {
     alignItems: 'center',
@@ -233,8 +236,8 @@ const styles = StyleSheet.create({
   description: {
     fontSize: FONT_SIZE.sm,
     color: COLORS.text,
-    marginBottom: 12,
-    lineHeight: 18,
+    marginBottom: 14,
+    lineHeight: 21,
   },
   footer: {
     flexDirection: 'row',
@@ -248,8 +251,8 @@ const styles = StyleSheet.create({
   },
   joinBtn: {
     backgroundColor: COLORS.green,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     borderRadius: RADIUS.md,
   },
   joinBtnJoined: {

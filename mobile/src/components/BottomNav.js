@@ -36,13 +36,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg2,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    paddingBottom: 20,
-    paddingTop: 10,
+    paddingBottom: 22,
+    paddingTop: 12,
   },
   item: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
   },
   icon: {
     fontSize: 20,
@@ -56,9 +56,10 @@ const styles = StyleSheet.create({
     color: COLORS.green,
   },
   label: {
-    fontSize: 10,
+    fontSize: 11,
     color: COLORS.text3,
     fontWeight: '600',
+    letterSpacing: 0.2,
   },
   labelActive: {
     color: COLORS.green,
