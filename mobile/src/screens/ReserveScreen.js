@@ -6,7 +6,7 @@ import {
 import { COLORS, RADIUS, FONT_SIZE, LINE_HEIGHT } from '../constants/theme';
 import {
   FACILITIES, getTodayStr, addDays, getDayOfWeek,
-  formatDate, formatHour, getSlotsForCourt, getCourtById, genId,
+  formatDate, formatHour, getSlotsForCourt, getCourtById,
 } from '../constants/data';
 import { SportIcon, TickIcon } from '../constants/icons';
 
@@ -83,22 +83,45 @@ export default function ReserveScreen({ bookings, facilities: propFacilities, on
   };
 
   const handleConfirm = () => {
+    if (!user?.id) {
+      showToast('You must be signed in to reserve a court.', 'error');
+      return;
+    }
+    if (!data.facilityId || !data.courtId || !data.sport) {
+      showToast('Please complete all reservation steps before confirming.', 'error');
+      return;
+    }
+    if (data.startHour === null || data.startHour === undefined) {
+      showToast('Please pick a time slot before confirming.', 'error');
+      return;
+    }
+
+    const startHour = Number(data.startHour);
+    const endHour = startHour + Number(data.duration || 1);
+
+    const teammatesArray = Array.isArray(data.teammates)
+      ? data.teammates.map((t) => (typeof t === 'string' ? t.trim() : t)).filter(Boolean)
+      : [];
+
+    // Payload matching backend contract at POST /api/bookings exactly.
+    // Required: userId, facilityId, courtId, date, startHour, endHour, sport.
     const payload = {
-      id: genId(),
+      userId: String(user.id),
+      facilityId: data.facilityId,
       courtId: data.courtId,
       date: data.date,
-      startHour: data.startHour,
-      endHour: data.startHour + data.duration,
+      startHour,
+      endHour,
       sport: data.sport,
       courtType: data.courtType || null,
-      players: totalPlayers,
-      owner: user?.id,
-      teammates: data.teammates.filter(t => t.trim()),
-      status: 'upcoming',
+      players: totalPlayers || 1,
+      teammates: teammatesArray,
+      // Extras kept for UI / future use (ignored by backend if unsupported)
       isPublic: data.isPublic,
       skillLevel: data.skillLevel,
       gameDescription: data.gameDescription,
     };
+
     onAddBooking(payload)
       .then(() => {
         setConfirmed(true);
