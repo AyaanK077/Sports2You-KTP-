@@ -19,10 +19,20 @@ export default function ReservationsScreen({ user, bookings, facilities = {}, on
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>My Reservations</Text>
-        <TouchableOpacity style={styles.reserveBtn} onPress={() => setPage('reserve')}>
-          <Text style={styles.reserveBtnText}>+ New</Text>
+        <TouchableOpacity
+          onPress={() => setPage('home')}
+          style={styles.headerBack}
+          hitSlop={{ top: 8, bottom: 8, left: 0, right: 8 }}
+          accessibilityLabel="Back to home"
+        >
+          <Text style={styles.backToHome}>← Home</Text>
         </TouchableOpacity>
+        <Text style={styles.pageTitle} numberOfLines={1}>My Reservations</Text>
+        <View style={styles.pageHeaderRight}>
+          <TouchableOpacity style={styles.reserveBtn} onPress={() => setPage('reserve')}>
+            <Text style={styles.reserveBtnText}>+ New</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Tabs */}
@@ -76,14 +86,25 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   pageHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    gap: 6,
   },
-  pageTitle: { fontSize: FONT_SIZE.xxl, fontWeight: '800', color: COLORS.text },
+  headerBack: { minWidth: 76 },
+  backToHome: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.sm },
+  pageTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: FONT_SIZE.lg,
+    fontWeight: '800',
+    color: COLORS.text,
+    letterSpacing: -0.2,
+  },
+  pageHeaderRight: { minWidth: 72, alignItems: 'flex-end' },
   reserveBtn: {
     backgroundColor: COLORS.orange,
     paddingHorizontal: 16,

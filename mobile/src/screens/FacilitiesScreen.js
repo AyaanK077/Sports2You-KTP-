@@ -66,7 +66,11 @@ export default function FacilitiesScreen({ facilities = {}, setPage }) {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Facilities</Text>
+        <TouchableOpacity onPress={() => setPage('home')} style={styles.headerBack} hitSlop={{ top: 8, bottom: 8, left: 0, right: 8 }} accessibilityLabel="Back to home">
+          <Text style={styles.backToHome}>← Home</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle} numberOfLines={1}>Facilities</Text>
+        <View style={styles.headerRightSpacer} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         {Object.values(facilities || {}).map((f) => (
@@ -97,12 +101,19 @@ export default function FacilitiesScreen({ facilities = {}, setPage }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   header: {
-    padding: 20,
-    paddingTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    gap: 8,
   },
-  pageTitle: { fontSize: FONT_SIZE.xxl, fontWeight: '800', color: COLORS.text, letterSpacing: -0.3 },
+  headerBack: { minWidth: 80 },
+  backToHome: { color: COLORS.green, fontWeight: '700', fontSize: FONT_SIZE.sm },
+  headerRightSpacer: { minWidth: 80 },
+  pageTitle: { flex: 1, textAlign: 'center', fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text, letterSpacing: -0.3 },
   content: { padding: 20, paddingBottom: 44 },
 
   facilityCard: {
